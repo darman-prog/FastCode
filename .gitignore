@@ -1,0 +1,44 @@
+# ---- OpenCode ----
+/.opencode
+
+# ---- Dependencies ----
+node_modules/
+
+# ---- Environment ----
+.env
+.env.local
+.env.*.local
+
+# ---- Build ----
+dist/
+build/
+*.tsbuildinfo
+
+# ---- IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Prisma ----
+backend/prisma/*.db
+
+# ---- Logs ----
+*.log
+npm-debug.log*
+
+# ---- Docker ----
+docker-compose.override.yml
+
+# ---- Coverage ----
+coverage/
+
+
+# ---- Documents ----
+/Docs
+AGENTS.md
