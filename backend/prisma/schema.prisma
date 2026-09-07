@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  elo          Int      @default(1200)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  matchesAsPlayer1 Match[]          @relation("player1")
+  matchesAsPlayer2 Match[]          @relation("player2")
+  submissions      Submission[]
+  integrityEvents  IntegrityEvent[]
+
+  @@map("users")
+}
+
+model Problem {
+  id                  String     @id @default(uuid()) @db.Uuid
+  title               String
+  difficulty          Difficulty
+  descriptionTemplate String     @map("description_template") @db.Text
+  variablePool        Json       @map("variable_pool")
+  timeLimitSeconds    Int        @map("time_limit_seconds")
+  createdAt           DateTime   @default(now()) @map("created_at")
+
+  testCases TestCase[]
+  matches   Match[]
+
+  @@map("problems")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+
+  @@map("difficulty")
+}
+
+model TestCase {
+  id             String  @id @default(uuid()) @db.Uuid
+  problemId      String  @map("problem_id") @db.Uuid
+  input          String  @db.Text
+  expectedOutput String  @map("expected_output") @db.Text
+  isPublic       Boolean @map("is_public")
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@map("test_cases")
+}
+
+model Match {
+  id             String        @id @default(uuid()) @db.Uuid
+  player1Id      String        @map("player1_id") @db.Uuid
+  player2Id      String        @map("player2_id") @db.Uuid
+  problemId      String        @map("problem_id") @db.Uuid
+  dynamicVariant Json          @map("dynamic_variant")
+  status         MatchStatus
+  finishReason   FinishReason? @map("finish_reason")
+  winnerId       String?       @map("winner_id") @db.Uuid
+  startedAt      DateTime?     @map("started_at")
+  finishedAt     DateTime?     @map("finished_at")
+  graceEndsAt    DateTime?     @map("grace_ends_at")
+  timeoutAt      DateTime?     @map("timeout_at")
+  eloChangeP1    Int?          @map("elo_change_p1")
+  eloChangeP2    Int?          @map("elo_change_p2")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  player1         User             @relation("player1", fields: [player1Id], references: [id])
+  player2         User             @relation("player2", fields: [player2Id], references: [id])
+  problem         Problem          @relation(fields: [problemId], references: [id])
+  submissions     Submission[]
+  integrityEvents IntegrityEvent[]
+
+  @@map("matches")
+}
+
+enum MatchStatus {
+  IN_QUEUE
+  MATCH_FOUND
+  GRACE_PERIOD
+  ACTIVE
+  FINISHED
+
+  @@map("match_status")
+}
+
+enum FinishReason {
+  COMPLETION
+  TIMEOUT
+  PARTIAL_PROGRESS
+  FEWER_FAILURES
+  TECHNICAL_DRAW
+  DISCONNECTION
+  INTEGRITY_VIOLATION
+
+  @@map("finish_reason")
+}
+
+model Submission {
+  id          String   @id @default(uuid()) @db.Uuid
+  matchId     String   @map("match_id") @db.Uuid
+  playerId    String   @map("player_id") @db.Uuid
+  code        String   @db.Text
+  passedCases Int      @map("passed_cases")
+  totalCases  Int      @map("total_cases")
+  isComplete  Boolean  @map("is_complete")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  match  Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player User  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("submissions")
+}
+
+model IntegrityEvent {
+  id          String         @id @default(uuid()) @db.Uuid
+  matchId     String         @map("match_id") @db.Uuid
+  playerId    String         @map("player_id") @db.Uuid
+  level       IntegrityLevel
+  eventType   String         @map("event_type")
+  durationMs  Int?           @map("duration_ms")
+  actionTaken String?        @map("action_taken")
+  occurredAt  DateTime       @default(now()) @map("occurred_at")
+
+  match  Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player User  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("integrity_events")
+}
+
+enum IntegrityLevel {
+  LOW
+  MODERATE
+  SEVERE
+
+  @@map("integrity_level")
+}
