@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progreso del Proyecto — FastCode MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border-color: #334155;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            }
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        
+        .content { padding: 2rem; }
+        
+        h2 {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        h2:first-child { margin-top: 0; }
+        
+        h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+        h4 { font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 1.25rem 0 0.5rem; }
+        
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        strong { color: var(--text-primary); font-weight: 600; }
+        
+        /* Progress Bars */
+        .progress-section { margin: 1.5rem 0; }
+        .progress-item { margin-bottom: 1rem; }
+        .progress-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+        .progress-label { font-weight: 500; color: var(--text-primary); }
+        .progress-value { font-weight: 600; color: var(--accent-primary); }
+        .progress-bar { height: 8px; background: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 9999px; transition: width 0.3s ease; }
+        .progress-fill.success { background: var(--success); }
+        .progress-fill.warning { background: var(--warning); }
+        .progress-fill.error { background: var(--error); }
+        .progress-fill.info { background: var(--info); }
+        
+        /* Status Badges */
+        .status-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+        .status-badge { padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; }
+        .status-done { background: #d1fae5; color: #059669; }
+        .status-partial { background: #fef3c7; color: #d97706; }
+        .status-pending { background: #fee2e2; color: #dc2626; }
+        .status-postpone { background: #f3f4f6; color: #6b7280; }
+        
+        @media (prefers-color-scheme: dark) {
+            .status-done { background: #14532d; color: #86efac; }
+            .status-partial { background: #451a03; color: #fcd34d; }
+            .status-pending { background: #4c1d1d; color: #fca5a5; }
+            .status-postpone { background: #374151; color: #9ca3af; }
+        }
+        
+        /* Lists */
+        ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        li::marker { color: var(--accent-primary); }
+        
+        /* Tables */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            margin: 1.5rem 0; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        thead { background: var(--bg-tertiary); }
+        th { padding: 0.875rem 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 0.875rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+        tbody tr:hover { background: var(--bg-secondary); }
+        
+        /* Callouts */
+        .callout { padding: 1rem 1.25rem; border-radius: var(--radius-md); margin: 1.5rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .callout-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .callout-content { flex: 1; }
+        .callout-title { font-weight: 600; margin-bottom: 0.25rem; }
+        
+        .callout-note { background: #eff6ff; border-left: 4px solid var(--accent-primary); }
+        .callout-note .callout-title { color: var(--accent-primary); }
+        .callout-important { background: #faf5ff; border-left: 4px solid var(--accent-secondary); }
+        .callout-important .callout-title { color: var(--accent-secondary); }
+        .callout-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .callout-warning .callout-title { color: var(--warning); }
+        .callout-tip { background: #ecfdf5; border-left: 4px solid var(--success); }
+        .callout-tip .callout-title { color: var(--success); }
+        .callout-caution { background: #fef2f2; border-left: 4px solid var(--error); }
+        .callout-caution .callout-title { color: var(--error); }
+        
+        @media (prefers-color-scheme: dark) {
+            .callout-note { background: #1e3a5f; }
+            .callout-important { background: #2e1065; }
+            .callout-warning { background: #451a03; }
+            .callout-tip { background: #064e3b; }
+            .callout-caution { background: #450a0a; }
+        }
+        
+        /* Code */
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.875em; color: var(--accent-secondary); }
+        pre { background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; margin: 1rem 0; }
+        pre code { background: none; padding: 0; color: var(--text-primary); }
+        
+        /* Divider */
+        hr { border: none; height: 1px; background: var(--border-color); margin: 2rem 0; }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .container { border-radius: 0; }
+            .content { padding: 1.5rem 1rem; }
+            .header { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📊 Progreso del Proyecto — FastCode MVP</h1>
+            <span class="header-badge">Dashboard de Estado</span>
+        </header>
+        <main class="content">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Última actualización:</strong> 2026-09-08</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Fase actual:</strong> Desarrollo temprano del MVP</span>
+            </div>
+            
+            <h2>Estado General del Proyecto</h2>
+            <p>FastCode se encuentra en fase de desarrollo temprano. La infraestructura base del monorepo está configurada con el stack tecnológico definido, pero la mayoría de los requisitos funcionales del PRD aún no están implementados.</p>
+            
+            <!-- Progress Overview -->
+            <div class="progress-section">
+                <h3>Progreso General</h3>
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">MVP Completado</span>
+                        <span class="progress-value">~15%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill info" style="width: 15%;"></div>
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">Infraestructura Base</span>
+                        <span class="progress-value">~80%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill success" style="width: 80%;"></div>
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">Requisitos Funcionales</span>
+                        <span class="progress-value">~10%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill error" style="width: 10%;"></div>
+                    </div>
+                </div>
+                <div class="progress-item">
+                    <div class="progress-header">
+                        <span class="progress-label">Frontend</span>
+                        <span class="progress-value">~5%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill error" style="width: 5%;"></div>
+                    </div>
+                </div>
+            </div>
+<h3 id="stack-tecnológico">Stack Tecnológico</h3>
+<p><strong>Backend:</strong></p>
+<ul>
+<li>NestJS 12.0.1 (framework Node.js)</li>
+<li>Prisma 6.19.3 (ORM)</li>
+<li>PostgreSQL (base de datos)</li>
+<li>Redis 6.0.0 (cache/colas)</li>
+<li><a href="http://Socket.io">Socket.io</a> 4.8.3 (WebSockets)</li>
+<li>JWT + Passport (autenticación)</li>
+<li>Vitest (testing)</li>
+<li>Oxlint (linting)</li>
+</ul>
+<p><strong>Frontend:</strong></p>
+<ul>
+<li>React 19.2.8</li>
+<li>Vite 8.2.2 (build tool)</li>
+<li>TypeScript 6.0.2</li>
+<li>Tailwind CSS 4.3.3</li>
+<li>Zustand 5.0.15 (estado global)</li>
+<li>Socket.io-client 4.8.3</li>
+<li>Monaco Editor (editor de código)</li>
+<li>React Router DOM 7.18.3</li>
+<li>Axios (HTTP client)</li>
+<li>Oxlint (linting)</li>
+</ul>
+<hr>
+<h2 id="2-estructura-del-monorepo">2. Estructura del Monorepo</h2>
+<pre><code>FastCode/
+├── backend/              # API NestJS
+│   ├── src/
+│   │   ├── domain/      # Lógica de dominio (Clean Architecture)
+│   │   │   └── elo/     # Calculadora Elo (implementado)
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   ├── prisma/
+│   │   └── schema.prisma # Modelo de datos completo
+│   ├── test/
+│   └── package.json
+├── frontend/            # SPA React
+│   ├── src/
+│   │   ├── App.tsx      # Plantilla base (sin personalizar)
+│   │   └── main.tsx
+│   └── package.json
+├── Docs/                # Documentación
+│   ├── MvpRequerimientos.md
+│   ├── DiseñoUI.md
+│   ├── DiseñoStitch.md
+│   ├── PropuestasFastCode.md
+│   ├── ideas.txt
+│   └── progreso.md (este archivo)
+├── .env.example         # Variables de entorno
+├── docker-compose.dev.yml
+└── AGENTS.md            # Convenciones del proyecto
+</code></pre>
+<hr>
+<h2 id="3-estado-de-implementación-por-requisito">3. Estado de Implementación por Requisito</h2>
+<h3>RF1 - Gestión de Usuarios y Perfiles</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF1.1 Autenticación</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Modelo User existe en Prisma, sin endpoints</td>
+</tr>
+<tr>
+<td>RF1.2 Puntuación inicial</td>
+<td><span class="status-badge status-done">Modelo definido</span></td>
+<td>Elo inicial 1200 en schema.prisma:15</td>
+</tr>
+<tr>
+<td>RF1.3 Perfil mínimo</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Sin API ni UI</td>
+</tr>
+<tr>
+<td>RF1.4 Historial/insignias</td>
+<td><span class="status-badge status-postpone">Post-MVP</span></td>
+<td>Fuera del alcance inicial</td>
+</tr>
+</tbody>
+</table>
+
+<h3>RF2 - Banco de Problemas y Variantes Dinámicas</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF2.1 Catálogo y dificultad</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>Modelo Problem con Difficulty enum, sin datos seed</td>
+</tr>
+<tr>
+<td>RF2.2 Casos de prueba</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>Modelo TestCase definido, sin lógica de evaluación</td>
+</tr>
+<tr>
+<td>RF2.3 Enunciado dinámico</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>variablePool en schema, sin generador de variantes</td>
+</tr>
+<tr>
+<td>RF2.4 Tiempo límite</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>timeLimitSeconds en modelo, sin validación</td>
+</tr>
+<tr>
+<td>RF2.5 Insignias</td>
+<td><span class="status-badge status-postpone">Post-MVP</span></td>
+<td>Fuera del alcance inicial</td>
+</tr>
+</tbody>
+</table>
+
+<h3>RF3 - Matchmaking y Emparejamiento</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF3.1 Cola de espera</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Requiere Redis + WebSockets</td>
+</tr>
+<tr>
+<td>RF3.2 Rango de búsqueda</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Ventanas acumulativas no implementadas</td>
+</tr>
+<tr>
+<td>RF3.3 Timeout sin bot</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Lógica de timeout pendiente</td>
+</tr>
+</tbody>
+</table>
+
+<h3>RF4 - Arena de Duelo 1v1</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF4.1 Ciclo de vida</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Enum MatchStatus existe, sin máquina de estados</td>
+</tr>
+<tr>
+<td>RF4.2 Periodo de gracia</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>gracePeriodsAt en schema, sin lógica</td>
+</tr>
+<tr>
+<td>RF4.3 Editor integrado</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>Monaco instalado en frontend, sin integrar</td>
+</tr>
+<tr>
+<td>RF4.4 Envíos y progreso</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Modelo Submission existe, sin endpoint</td>
+</tr>
+<tr>
+<td>RF4.5 Progreso visual</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Requiere WebSockets</td>
+</tr>
+<tr>
+<td>RF4.6 Alertas de actividad</td>
+<td><span class="status-badge status-postpone">Post-MVP</span></td>
+<td>Opcional según PRD</td>
+</tr>
+</tbody>
+</table>
+
+<h3>RF5 - Resultado, Victoria y Elo</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF5.1 Jerarquía de resolución</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Enum FinishReason existe, sin servicio</td>
+</tr>
+<tr>
+<td>RF5.2 Reglas de conteo</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Sin lógica de validación</td>
+</tr>
+<tr>
+<td>RF5.3 Actualización del Elo</td>
+<td><span class="status-badge status-done">Implementado</span></td>
+<td><code>elo.service.ts</code> con K=32, empate técnico sin cambio</td>
+</tr>
+<tr>
+<td>RF5.4 Resultado visible</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Sin API ni UI</td>
+</tr>
+</tbody>
+</table>
+
+<h3>RF6 - Telemetría y Evidencia de Integridad</h3>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Estado</th>
+<th>Notas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF6.1 Principio</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>Modelo IntegrityEvent existe, sin implementación</td>
+</tr>
+<tr>
+<td>RF6.2 Niveles</td>
+<td><span class="status-badge status-partial">Parcial</span></td>
+<td>Enum IntegrityLevel (LOW/MODERATE/SEVERE)</td>
+</tr>
+<tr>
+<td>RF6.3 Registro</td>
+<td><span class="status-badge status-pending">No implementado</span></td>
+<td>Sin captura de eventos ni políticas</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-base-de-datos">4. Base de Datos</h2>
+<h3 id="schema-prisma-completo-">Schema Prisma Completo ✅</h3>
+<p><strong>Modelos definidos:</strong></p>
+<ul>
+<li><code>User</code> (usuarios con Elo)</li>
+<li><code>Problem</code> (problemas con dificultad y variantes)</li>
+<li><code>TestCase</code> (casos públicos y ocultos)</li>
+<li><code>Match</code> (partidas con ciclo de vida completo)</li>
+<li><code>Submission</code> (envíos de código)</li>
+<li><code>IntegrityEvent</code> (telemetría de integridad)</li>
+</ul>
+<p><strong>Enums:</strong></p>
+<ul>
+<li><code>Difficulty</code>: EASY, MEDIUM, HARD</li>
+<li><code>MatchStatus</code>: IN_QUEUE, MATCH_FOUND, GRACE_PERIOD, ACTIVE, FINISHED</li>
+<li><code>FinishReason</code>: COMPLETION, TIMEOUT, PARTIAL_PROGRESS, FEWER_FAILURES, TECHNICAL_DRAW, DISCONNECTION, INTEGRITY_VIOLATION</li>
+<li><code>IntegrityLevel</code>: LOW, MODERATE, SEVERE</li>
+</ul>
+<p><strong>Relaciones:</strong></p>
+<ul>
+<li>User ↔ Match (player1, player2)</li>
+<li>User ↔ Submission</li>
+<li>User ↔ IntegrityEvent</li>
+<li>Problem ↔ TestCase</li>
+<li>Problem ↔ Match</li>
+<li>Match ↔ Submission</li>
+<li>Match ↔ IntegrityEvent</li>
+</ul>
+<p><strong>Convenciones:</strong></p>
+<ul>
+<li>IDs UUID</li>
+<li>snake_case en columnas (@map)</li>
+<li>Timestamps createdAt/updatedAt</li>
+<li>Índices implícitos en relaciones</li>
+</ul>
+<hr>
+<h2 id="5-frontend">5. Frontend</h2>
+<h3 id="estado-actual">Estado Actual</h3>
+<ul>
+<li>✅ Proyecto Vite + React inicializado</li>
+<li>✅ Dependencias instaladas (Monaco, Zustand, Socket.io-client, Tailwind, etc.)</li>
+<li>⚠️ Solo plantilla base por defecto (App.tsx sin personalizar)</li>
+<li>❌ Sin estructura de features/core/shared</li>
+<li>❌ Sin rutas configuradas</li>
+<li>❌ Sin componentes UI</li>
+<li>❌ Sin integración con backend</li>
+</ul>
+<h3 id="pendiente">Pendiente</h3>
+<ul>
+<li>Configurar React Router con rutas principales</li>
+<li>Crear estructura de carpetas según convenciones (features/, core/, shared/)</li>
+<li>Implementar interceptores (auth, error, loading, traceId)</li>
+<li>Crear componentes base (botones, inputs, modales)</li>
+<li>Implementar pantallas: Auth, Perfil, Cola, Arena, Resultado</li>
+<li>Integrar Socket.io-client para tiempo real</li>
+<li>Configurar Zustand para estado global</li>
+<li>Integrar Monaco Editor en Arena</li>
+<li>Implementar diseño responsive mobile-first</li>
+<li>Aplicar tokens de diseño (spacing 4/8, tipografía, colores)</li>
+<li>Asegurar accesibilidad WCAG 2.1 AA</li>
+</ul>
+<hr>
+<h2 id="6-backend">6. Backend</h2>
+<h3 id="estado-actual-1">Estado Actual</h3>
+<ul>
+<li>✅ NestJS configurado con módulos básicos</li>
+<li>✅ Prisma schema completo</li>
+<li>✅ Calculadora Elo implementada (<code>domain/elo/elo.service.ts</code>)</li>
+<li>✅ Configuración de Vitest para tests</li>
+<li>✅ Oxlint configurado</li>
+<li>❌ Sin módulos de dominio (auth, users, problems, matches, etc.)</li>
+<li>❌ Sin controllers ni endpoints</li>
+<li>❌ Sin servicios de aplicación</li>
+<li>❌ Sin adaptadores de infraestructura</li>
+<li>❌ Sin middleware de autenticación</li>
+<li>❌ Sin validación de DTOs</li>
+<li>❌ Sin WebSockets implementados</li>
+<li>❌ Sin integración con Redis</li>
+<li>❌ Sin sandbox de ejecución de código</li>
+</ul>
+<h3 id="pendiente-1">Pendiente</h3>
+<ul>
+<li>Implementar estructura de Clean Architecture (domain/application/adapters/infrastructure)</li>
+<li>Crear módulo Auth (registro, login, JWT)</li>
+<li>Crear módulo Users (perfil, Elo)</li>
+<li>Crear módulo Problems (CRUD, variantes dinámicas)</li>
+<li>Crear módulo Matches (cola, matchmaking, ciclo de vida)</li>
+<li>Crear módulo Submissions (envíos, evaluación)</li>
+<li>Crear módulo Integrity (telemetría, sanciones)</li>
+<li>Implementar WebSockets con <a href="http://Socket.io">Socket.io</a></li>
+<li>Configurar Redis para colas y cache</li>
+<li>Implementar sandbox de ejecución (aislamiento de código)</li>
+<li>Crear DTOs con class-validator</li>
+<li>Implementar guards y decorators</li>
+<li>Configurar logging con Pino</li>
+<li>Implementar interceptores (error, traceId)</li>
+<li>Crear seed data para problemas iniciales</li>
+</ul>
+<hr>
+<h2 id="7-infraestructura">7. Infraestructura</h2>
+<h3 id="configurado-">Configurado ✅</h3>
+<ul>
+<li>✅ Docker Compose para desarrollo (<code>docker-compose.dev.yml</code>)</li>
+<li>✅ Variables de entorno definidas (<code>.env.example</code>)
+<ul>
+<li>PostgreSQL</li>
+<li>Redis</li>
+<li>JWT (secret, expiraciones)</li>
+<li>CORS</li>
+<li>Sandbox (timeout, memoria, CPU)</li>
+</ul>
+</li>
+<li>✅ Configuración de linting (Oxlint)</li>
+<li>✅ Configuración de testing (Vitest)</li>
+<li>✅ Prettier para formateo</li>
+</ul>
+<h3 id="pendiente-2">Pendiente</h3>
+<ul>
+<li>Configurar CI/CD (GitHub Actions)</li>
+<li>Configurar entorno de staging/producción</li>
+<li>Implementar health checks</li>
+<li>Configurar monitoreo y métricas</li>
+<li>Documentar despliegue</li>
+<li>Configurar backups de base de datos</li>
+</ul>
+<hr>
+<h2 id="8-documentación">8. Documentación</h2>
+<h3 id="disponible-">Disponible ✅</h3>
+<ul>
+<li>✅ <code>MvpRequerimientos.md</code> - PRD completo v2.0</li>
+<li>✅ <code>DiseñoUI.md</code> - Especificaciones UI/UX</li>
+<li>✅ <code>DiseñoStitch.md</code> - Wireframes y diseño visual</li>
+<li>✅ <code>AGENTS.md</code> - Convenciones del proyecto</li>
+<li>✅ <code>.env.example</code> - Variables de entorno</li>
+<li>✅ <code>progreso.md</code> - Este archivo</li>
+</ul>
+<h3 id="pendiente-3">Pendiente</h3>
+<ul>
+<li>Documentación de API (OpenAPI/Swagger)</li>
+<li>Guía de instalación y setup</li>
+<li>Guía de contribución</li>
+<li>Documentación de arquitectura técnica</li>
+<li>Manual de despliegue</li>
+</ul>
+<hr>
+<h2 id="9-próximos-pasos-prioritarios">9. Próximos Pasos Prioritarios</h2>
+<h3 id="fase-1-fundación-semanas-1-2">Fase 1: Fundación (Semanas 1-2)</h3>
+<ol>
+<li>
+<p><strong>Backend - Autenticación</strong></p>
+<ul>
+<li>Implementar módulo Auth con registro/login</li>
+<li>Configurar JWT y guards</li>
+<li>Crear endpoints <code>/api/v1/auth/register</code> y <code>/api/v1/auth/login</code></li>
+<li>Tests unitarios y de integración</li>
+</ul>
+</li>
+<li>
+<p><strong>Backend - Usuarios</strong></p>
+<ul>
+<li>Implementar módulo Users</li>
+<li>Endpoint <code>/api/v1/users/profile</code></li>
+<li>Validar acceso propio (RF1.3)</li>
+</ul>
+</li>
+<li>
+<p><strong>Frontend - Auth y Perfil</strong></p>
+<ul>
+<li>Configurar React Router</li>
+<li>Crear pantalla de autenticación (login/registro)</li>
+<li>Crear pantalla de perfil mínimo</li>
+<li>Integrar con API de auth</li>
+</ul>
+</li>
+</ol>
+<h3 id="fase-2-problemas-y-variantes-semanas-3-4">Fase 2: Problemas y Variantes (Semanas 3-4)</h3>
+<ol start="4">
+<li>
+<p><strong>Backend - Problemas</strong></p>
+<ul>
+<li>Implementar módulo Problems con CRUD</li>
+<li>Endpoint <code>/api/v1/problems</code> (admin)</li>
+<li>Generador de variantes dinámicas (RF2.3)</li>
+<li>Seed data con 3 problemas (1 Fácil, 1 Medio, 1 Difícil)</li>
+</ul>
+</li>
+<li>
+<p><strong>Backend - Casos de Prueba</strong></p>
+<ul>
+<li>Implementar evaluación de casos</li>
+<li>Sandbox de ejecución aislado</li>
+<li>Endpoint de envío de soluciones</li>
+</ul>
+</li>
+</ol>
+<h3 id="fase-3-matchmaking-semanas-5-6">Fase 3: Matchmaking (Semanas 5-6)</h3>
+<ol start="6">
+<li>
+<p><strong>Backend - Cola de Matchmaking</strong></p>
+<ul>
+<li>Implementar cola con Redis</li>
+<li>Lógica de ventanas acumulativas (RF3.2)</li>
+<li>Timeout de 40 segundos (RF3.3)</li>
+<li>WebSockets para notificaciones</li>
+</ul>
+</li>
+<li>
+<p><strong>Frontend - Cola</strong></p>
+<ul>
+<li>Pantalla de cola con cronómetro</li>
+<li>Indicador de rango Elo activo</li>
+<li>Estados: buscando, timeout, error</li>
+</ul>
+</li>
+</ol>
+<h3 id="fase-4-arena-de-duelo-semanas-7-9">Fase 4: Arena de Duelo (Semanas 7-9)</h3>
+<ol start="8">
+<li>
+<p><strong>Backend - Ciclo de Vida</strong></p>
+<ul>
+<li>Máquina de estados de partida (RF4.1)</li>
+<li>Periodo de gracia de 15 segundos (RF4.2)</li>
+<li>Gestión de timeouts</li>
+<li>WebSockets para progreso en vivo</li>
+</ul>
+</li>
+<li>
+<p><strong>Backend - Evaluación</strong></p>
+<ul>
+<li>Lógica de resolución jerárquica (RF5.1)</li>
+<li>Actualización de Elo (RF5.3)</li>
+<li>Manejo de empates técnicos</li>
+</ul>
+</li>
+<li>
+<p><strong>Frontend - Arena</strong></p>
+<ul>
+<li>Integrar Monaco Editor</li>
+<li>Pantalla de duelo con dos columnas</li>
+<li>Progreso visual del oponente</li>
+<li>Cronómetro y fases de partida</li>
+</ul>
+</li>
+</ol>
+<h3 id="fase-5-integridad-y-resultado-semanas-10-11">Fase 5: Integridad y Resultado (Semanas 10-11)</h3>
+<ol start="11">
+<li>
+<p><strong>Backend - Telemetría</strong></p>
+<ul>
+<li>Captura de eventos de integridad (RF6.1)</li>
+<li>Clasificación de niveles (RF6.2)</li>
+<li>Políticas de sanción</li>
+<li>Derrota automática por integridad</li>
+</ul>
+</li>
+<li>
+<p><strong>Backend - Resultado</strong></p>
+<ul>
+<li>Endpoint de resultado de partida</li>
+<li>Historial de partidas</li>
+<li>Actualización de Elo</li>
+</ul>
+</li>
+<li>
+<p><strong>Frontend - Resultado</strong></p>
+<ul>
+<li>Pantalla de resultado</li>
+<li>Mostrar ganador, motivo, progreso, Elo</li>
+<li>Estados de carga y error</li>
+</ul>
+</li>
+</ol>
+<h3 id="fase-6-pulido-y-testing-semana-12">Fase 6: Pulido y Testing (Semana 12)</h3>
+<ol start="14">
+<li>
+<p><strong>Testing Integral</strong></p>
+<ul>
+<li>Tests unitarios (cobertura &gt;80%)</li>
+<li>Tests de integración</li>
+<li>Tests E2E de flujos principales</li>
+<li>Tests de carga (100 partidas simultáneas)</li>
+</ul>
+</li>
+<li>
+<p><strong>Accesibilidad y UX</strong></p>
+<ul>
+<li>Auditoría WCAG 2.1 AA</li>
+<li>Estados de interfaz (loading, error, empty, disabled, success)</li>
+<li>Responsive mobile-first</li>
+<li>Feedback visual y de teclado</li>
+</ul>
+</li>
+<li>
+<p><strong>Seguridad</strong></p>
+<ul>
+<li>Rate limiting en auth y envíos</li>
+<li>Validación de inputs</li>
+<li>CORS configurado</li>
+<li>Cookies seguras (httpOnly, Secure, SameSite)</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="10-métricas-de-éxito-objetivos-del-prd">10. Métricas de Éxito (Objetivos del PRD)</h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Objetivo</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tiempo mediano de emparejamiento</td>
+<td>&lt; 20 segundos</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Partidas emparejadas en 40s</td>
+<td>≥ 70%</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Partidas completadas sin abandono</td>
+<td>≥ 60%</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Latencia p95 de eventos</td>
+<td>&lt; 150 ms</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Envíos con resultado en &lt; 5s</td>
+<td>≥ 95%</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Partidas con error del evaluador</td>
+<td>&lt; 5%</td>
+<td>❌ No medido</td>
+</tr>
+<tr>
+<td>Partidas con disputa de integridad</td>
+<td>&lt; 5%</td>
+<td>❌ No medido</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>Resumen Ejecutivo</h2>
+
+<div class="progress-section">
+    <div class="progress-item">
+        <div class="progress-header">
+            <span class="progress-label">Progreso General del MVP</span>
+            <span class="progress-value">~15%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill info" style="width: 15%;"></div>
+        </div>
+    </div>
+</div>
+
+<h3>Lo que está listo</h3>
+<ul class="checklist">
+    <li class="checklist-item"><div class="checkbox checked">✓</div> Infraestructura base del monorepo</li>
+    <li class="checklist-item"><div class="checkbox checked">✓</div> Stack tecnológico configurado</li>
+    <li class="checklist-item"><div class="checkbox checked">✓</div> Modelo de datos completo (Prisma schema)</li>
+    <li class="checklist-item"><div class="checkbox checked">✓</div> Calculadora Elo con lógica de empate técnico</li>
+</ul>
+
+<h3>Lo que falta</h3>
+<ul class="checklist">
+    <li class="checklist-item"><div class="checkbox"></div> Autenticación y gestión de usuarios</li>
+    <li class="checklist-item"><div class="checkbox"></div> API REST completa</li>
+    <li class="checklist-item"><div class="checkbox"></div> WebSockets para tiempo real</li>
+    <li class="checklist-item"><div class="checkbox"></div> Matchmaking y cola de búsqueda</li>
+    <li class="checklist-item"><div class="checkbox"></div> Arena de duelo funcional</li>
+    <li class="checklist-item"><div class="checkbox"></div> Evaluación de código y sandbox</li>
+    <li class="checklist-item"><div class="checkbox"></div> Telemetría de integridad</li>
+    <li class="checklist-item"><div class="checkbox"></div> Frontend funcional (solo plantilla base)</li>
+</ul>
+
+<div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+        <div class="callout-title">Riesgos identificados</div>
+        <ul style="margin: 0.5rem 0 0;">
+            <li>El sandbox de ejecución de código es crítico y complejo</li>
+            <li>La sincronización en tiempo real requiere testing exhaustivo</li>
+            <li>La generación de variantes dinámicas debe validar que no altera la dificultad</li>
+            <li>La telemetría puede generar falsos positivos si no se calibra bien</li>
+        </ul>
+    </div>
+</div>
+
+<div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <div class="callout-content">
+        <div class="callout-title">Recomendación</div>
+        <p style="margin: 0;">Priorizar la implementación de autenticación y flujo básico de partida (aunque sea sin evaluación de código) para validar la arquitectura antes de profundizar en features complejas.</p>
+    </div>
+</div>
+
+<hr>
+<p style="text-align: center; color: var(--text-tertiary); font-size: 0.875rem;"><strong>Nota:</strong> Este documento debe actualizarse al completar cada fase o hito importante del proyecto.</p>
+
+        </main>
+    </div>
+</body>
+</html>

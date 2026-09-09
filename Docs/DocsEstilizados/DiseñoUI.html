@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño UI/UX — FastCode MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border-color: #334155;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            }
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        
+        .content { padding: 2rem; }
+        
+        h2 {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        h2:first-child { margin-top: 0; }
+        
+        h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+        h4 { font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 1.25rem 0 0.5rem; }
+        
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        strong { color: var(--text-primary); font-weight: 600; }
+        
+        /* States Tags */
+        .states { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+        .state-tag { padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; }
+        .state-loading { background: #dbeafe; color: #1d4ed8; }
+        .state-error { background: #fee2e2; color: #dc2626; }
+        .state-empty { background: #f3f4f6; color: #4b5563; }
+        .state-disabled { background: #f3f4f6; color: #6b7280; }
+        .state-success { background: #d1fae5; color: #059669; }
+        
+        @media (prefers-color-scheme: dark) {
+            .state-loading { background: #1e3a5f; color: #93c5fd; }
+            .state-error { background: #4c1d1d; color: #fca5a5; }
+            .state-empty { background: #374151; color: #d1d5db; }
+            .state-disabled { background: #374151; color: #9ca3af; }
+            .state-success { background: #14532d; color: #86efac; }
+        }
+        
+        /* Lists */
+        ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        li::marker { color: var(--accent-primary); }
+        
+        /* Tables */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            margin: 1.5rem 0; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        thead { background: var(--bg-tertiary); }
+        th { padding: 0.875rem 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 0.875rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+        tbody tr:hover { background: var(--bg-secondary); }
+        
+        /* Callouts */
+        .callout { padding: 1rem 1.25rem; border-radius: var(--radius-md); margin: 1.5rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .callout-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .callout-content { flex: 1; }
+        .callout-title { font-weight: 600; margin-bottom: 0.25rem; }
+        
+        .callout-note { background: #eff6ff; border-left: 4px solid var(--accent-primary); }
+        .callout-note .callout-title { color: var(--accent-primary); }
+        .callout-important { background: #faf5ff; border-left: 4px solid var(--accent-secondary); }
+        .callout-important .callout-title { color: var(--accent-secondary); }
+        .callout-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .callout-warning .callout-title { color: var(--warning); }
+        .callout-tip { background: #ecfdf5; border-left: 4px solid var(--success); }
+        .callout-tip .callout-title { color: var(--success); }
+        .callout-caution { background: #fef2f2; border-left: 4px solid var(--error); }
+        .callout-caution .callout-title { color: var(--error); }
+        
+        @media (prefers-color-scheme: dark) {
+            .callout-note { background: #1e3a5f; }
+            .callout-important { background: #2e1065; }
+            .callout-warning { background: #451a03; }
+            .callout-tip { background: #064e3b; }
+            .callout-caution { background: #450a0a; }
+        }
+        
+        /* Rules */
+        .rules-grid { display: grid; gap: 0.75rem; margin: 1rem 0; }
+        .rule-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-sm); }
+        .rule-number { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; background: var(--accent-primary); color: white; border-radius: 50%; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+        
+        /* Code */
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.875em; color: var(--accent-secondary); }
+        pre { background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; margin: 1rem 0; }
+        pre code { background: none; padding: 0; color: var(--text-primary); }
+        
+        /* Divider */
+        hr { border: none; height: 1px; background: var(--border-color); margin: 2rem 0; }
+        
+        /* Checklist */
+        .checklist { list-style: none; padding: 0; }
+        .checklist-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-sm); margin-bottom: 0.5rem; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .checkbox.checked { background: var(--success); border-color: var(--success); color: white; }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .container { border-radius: 0; }
+            .content { padding: 1.5rem 1rem; }
+            .header { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎨 Diseño UI/UX — FastCode MVP</h1>
+            <span class="header-badge">Especificaciones de Interfaz y Experiencia</span>
+        </header>
+        <main class="content">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Versión:</strong> 1.0</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Fecha:</strong> 2026-08-30</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Basado en:</strong> PRD FastCode MVP v2.0</span>
+            </div>
+            
+            <div class="callout callout-note">
+                <span class="callout-icon">📝</span>
+                <div class="callout-content">
+                    <div class="callout-title">Nota</div>
+                    <p style="margin: 0;">Este documento define los requisitos de interfaz y experiencia de usuario para diseñar e implementar el frontend del MVP. Las decisiones de stack se rigen por una versión técnica posterior; aquí solo se especifica <strong>qué</strong> debe lograrse, no <strong>con qué</strong> herramientas.</p>
+                </div>
+            </div>
+            
+            <h2>Índice</h2>
+            <ol>
+                <li><a href="#principios">Principios Generales</a></li>
+                <li><a href="#estados">Estados de Interfaz</a></li>
+                <li><a href="#tokens">Sistema de Diseño Visual (Tokens)</a></li>
+                <li><a href="#componentes">Componentes Reutilizables</a></li>
+                <li><a href="#pantallas">Especificación por Pantalla</a></li>
+                <li><a href="#accesibilidad">Accesibilidad (WCAG 2.1 AA)</a></li>
+                <li><a href="#rendimiento">Rendimiento y Feedback</a></li>
+                <li><a href="#checklist">Checklist de Revisión UI/UX</a></li>
+            </ol>
+<hr>
+<p><a id="principios"></a></p>
+<h2 id="1-principios-generales">1. Principios Generales</h2>
+<table>
+<thead>
+<tr>
+<th>Principio</th>
+<th>Descripción</th>
+<th>Origen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mobile-first</td>
+<td>Diseñar primero para pantallas pequeñas; escalar a desktop.</td>
+<td>PRD RNF4.2</td>
+</tr>
+<tr>
+<td>Estado oficial primero</td>
+<td>La UI nunca decide el resultado; solo refleja el estado del servidor.</td>
+<td>PRD §2.2</td>
+</tr>
+<tr>
+<td>Feedback inmediato</td>
+<td>Toda acción del usuario confirma visualmente en &lt; 100 ms.</td>
+<td>RNF4.4</td>
+</tr>
+<tr>
+<td>Claridad competitiva</td>
+<td>El usuario siempre sabe: fase de la partida, tiempo restante, progreso y resultado.</td>
+<td>RNF4.4</td>
+</tr>
+<tr>
+<td>Acceder antes que decorar</td>
+<td>Contraste, foco y teclado antes que animaciones o efectos.</td>
+<td>WCAG 2.1 AA</td>
+</tr>
+</tbody>
+</table>
+<h3 id="organización-del-código-frontend">Organización del código frontend</h3>
+<ul>
+<li><code>features/</code> — funcionalidades específicas con carga diferida.</li>
+<li><code>core/</code> — servicios singleton, configuración e interceptores (<code>auth</code>, <code>error</code>, <code>loading</code>, <code>traceId</code>).</li>
+<li><code>shared/</code> — componentes y utilidades reutilizables sin lógica de negocio.</li>
+<li>Lógica de cada feature co-localizada (componentes, servicios, modelos, tests).</li>
+<li>Nombres de archivo <code>kebab-case</code>.</li>
+<li>No duplicar manejo transversal: usar los interceptores existentes.</li>
+</ul>
+<hr>
+<h2 id="estados">2. Estados de Interfaz</h2>
+<p>Toda pantalla, lista, formulario y control interactivo debe contemplar estos estados cuando correspondan:</p>
+
+<div class="states" style="margin-bottom: 1.5rem;">
+    <span class="state-tag state-loading">loading</span>
+    <span class="state-tag state-error">error</span>
+    <span class="state-tag state-empty">empty</span>
+    <span class="state-tag state-disabled">disabled</span>
+    <span class="state-tag state-success">success</span>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>Estado</th>
+<th>Descripción</th>
+<th>Comportamiento UI</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="state-tag state-loading">loading</span></td>
+<td>Operación asíncrona en curso</td>
+<td>Skeleton o spinner; bloquear acciones duplicadas.</td>
+</tr>
+<tr>
+<td><span class="state-tag state-error">error</span></td>
+<td>Fallo de red, validación o servidor</td>
+<td>Mensaje específico + acción de recuperación (reintentar).</td>
+</tr>
+<tr>
+<td><span class="state-tag state-empty">empty</span></td>
+<td>Colección intencionalmente vacía</td>
+<td>Ilustración/texto breve + acción sugerida (ej. "Buscar duelo").</td>
+</tr>
+<tr>
+<td><span class="state-tag state-disabled">disabled</span></td>
+<td>Acción temporalmente no disponible</td>
+<td>Apariencia atenuada + tooltip/aria que explique el motivo.</td>
+</tr>
+<tr>
+<td><span class="state-tag state-success">success</span></td>
+<td>Acción confirmada</td>
+<td>Notificación toast o estado visual en contexto.</td>
+</tr>
+</tbody>
+</table>
+
+<div class="callout callout-important">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+        <div class="callout-title">Importante</div>
+        <p style="margin: 0;">Ninguna pantalla puede renderizarse como "caja vacía sin explicación". Si no hay datos, siempre se muestra el estado <code>empty</code> con orientación.</p>
+    </div>
+</div>
+<hr>
+<p><a id="tokens"></a></p>
+<h2 id="3-sistema-de-diseño-visual-tokens">3. Sistema de Diseño Visual (Tokens)</h2>
+<h3 id="31-espaciado">3.1 Espaciado</h3>
+<p>Base de <strong>4px y 8px</strong>. Escala recomendada:</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Valor</th>
+<th>Uso típico</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>space-1</code></td>
+<td>4px</td>
+<td>Separación interna de iconos, micro-ajustes</td>
+</tr>
+<tr>
+<td><code>space-2</code></td>
+<td>8px</td>
+<td>Gap entre elementos relacionados</td>
+</tr>
+<tr>
+<td><code>space-3</code></td>
+<td>12px</td>
+<td>Padding interno de inputs pequeños</td>
+</tr>
+<tr>
+<td><code>space-4</code></td>
+<td>16px</td>
+<td>Padding estándar de tarjetas y secciones</td>
+</tr>
+<tr>
+<td><code>space-6</code></td>
+<td>24px</td>
+<td>Separación entre bloques de una vista</td>
+</tr>
+<tr>
+<td><code>space-8</code></td>
+<td>32px</td>
+<td>Margen entre secciones principales</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-tipografía">3.2 Tipografía</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Tamaño</th>
+<th>Peso</th>
+<th>Uso</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text-xs</code></td>
+<td>12px</td>
+<td>400</td>
+<td>Metadatos, timestamps</td>
+</tr>
+<tr>
+<td><code>text-sm</code></td>
+<td>14px</td>
+<td>400–500</td>
+<td>Texto secundario, labels</td>
+</tr>
+<tr>
+<td><code>text-base</code></td>
+<td>16px</td>
+<td>400</td>
+<td>Cuerpo principal (mínimo en mobile)</td>
+</tr>
+<tr>
+<td><code>text-lg</code></td>
+<td>18px</td>
+<td>500–600</td>
+<td>Subtítulos</td>
+</tr>
+<tr>
+<td><code>text-xl</code></td>
+<td>20–24px</td>
+<td>600</td>
+<td>Títulos de sección</td>
+</tr>
+<tr>
+<td><code>text-2xl</code></td>
+<td>28–32px</td>
+<td>700</td>
+<td>Títulos de pantalla</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Altura de línea: 1.4–1.6 para cuerpo; 1.2 para títulos.</li>
+<li>Familia monoespaciada exclusiva para código, temporizadores y números de Elo.</li>
+</ul>
+<h3 id="33-color-roles-semánticos">3.3 Color (roles semánticos)</h3>
+<table>
+<thead>
+<tr>
+<th>Rol</th>
+<th>Uso</th>
+<th>Contraste mínimo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primario</td>
+<td>Acciones principales (enviar, buscar duelo)</td>
+<td>4.5:1 sobre fondo</td>
+</tr>
+<tr>
+<td>Secundario</td>
+<td>Acciones alternativas</td>
+<td>4.5:1</td>
+</tr>
+<tr>
+<td>Éxito</td>
+<td>Victoria, envío aceptado, conexión restablecida</td>
+<td>4.5:1</td>
+</tr>
+<tr>
+<td>Error</td>
+<td>Derrota, error de envío, campo inválido</td>
+<td>4.5:1</td>
+</tr>
+<tr>
+<td>Advertencia</td>
+<td>Aviso de integridad, timeout próximo</td>
+<td>4.5:1</td>
+</tr>
+<tr>
+<td>Información</td>
+<td>Mensajes neutros del sistema</td>
+<td>4.5:1</td>
+</tr>
+<tr>
+<td>Neutro</td>
+<td>Texto, fondos, bordes (escala de grises)</td>
+<td>según jerarquía</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-caution">
+    <span class="callout-icon">🚫</span>
+    <div class="callout-content">
+        <div class="callout-title">Precaución</div>
+        <p style="margin: 0;">Nunca usar color como único canal (ej. error solo en rojo). Complementar con icono y texto.</p>
+    </div>
+</div>
+<h3 id="34-otros-tokens">3.4 Otros tokens</h3>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Valores</th>
+<th>Nota</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Radio</td>
+<td><code>sm</code> (4px), <code>md</code> (8px), <code>lg</code> (12px), <code>full</code></td>
+<td>Consistente entre botones, inputs y tarjetas</td>
+</tr>
+<tr>
+<td>Sombra</td>
+<td><code>sm</code>, <code>md</code>, <code>lg</code></td>
+<td>Solo para elevación real (modales, popovers)</td>
+</tr>
+<tr>
+<td>Duración</td>
+<td><code>fast</code> 150ms, <code>base</code> 200ms, <code>slow</code> 300ms</td>
+<td>Animaciones de entrada/salida; sin animaciones &gt; 500ms</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="componentes"></a></p>
+<h2 id="4-componentes-reutilizables-en-shared">4. Componentes Reutilizables (en <code>shared/</code>)</h2>
+<h3 id="41-botones">4.1 Botones</h3>
+<ul>
+<li>Variantes: <code>primary</code>, <code>secondary</code>, <code>ghost</code> (texto), <code>danger</code>.</li>
+<li>Tamaños: <code>sm</code>, <code>base</code>, <code>lg</code> con altura mínima táctil de <strong>44x44 px</strong>.</li>
+<li>Estados: reposo, hover. foco visible, activo, <code>disabled</code>, <code>loading</code> (spinner interno + etiqueta conservada).</li>
+</ul>
+<h3 id="42-campos-de-formulario">4.2 Campos de formulario</h3>
+<ul>
+<li>Tipos: texto, contraseña (con toggle de visibilidad accesible), email, numérico, textarea.</li>
+<li>Label visible asociado (prohibido placeholder como sustituto del label).</li>
+<li>Mensajes de error inline, vinculados con <code>aria-describedby</code>.</li>
+<li>Estados: reposo, foco, error, éxito, disabled, loading.</li>
+</ul>
+<h3 id="43-selectores-y-combobox">4.3 Selectores y combobox</h3>
+<ul>
+<li>Consistentes visualmente con inputs.</li>
+<li>Scroll interno para listas largas; virtualizar si &gt; 100 opciones.</li>
+<li>Estado loading para opciones remotas.</li>
+</ul>
+<h3 id="44-feedback">4.4 Feedback</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Uso</th>
+<th>Regla</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Toast</td>
+<td>Confirmaciones y errores transitorios</td>
+<td>Máx. 1 visible; duración 4–6s; rol <code>status</code>/<code>alert</code></td>
+</tr>
+<tr>
+<td>Banner</td>
+<td>Avisos persistentes de la vista (ej. desconexión)</td>
+<td>Dismissable; no usar para errores de campo</td>
+</tr>
+<tr>
+<td>Inline</td>
+<td>Errores de validación</td>
+<td>Junto al campo; color + icono + texto</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45-indicadores-de-carga">4.5 Indicadores de carga</h3>
+<ul>
+<li><strong>Spinner</strong>: acciones puntuales (botones, envíos).</li>
+<li><strong>Skeleton</strong>: contenido de página o tarjetas mientras cargan.</li>
+<li><strong>Barra de progreso</strong>: solo para procesos con avance conocido (ej. % de casos evaluados).</li>
+</ul>
+<h3 id="46-modales-y-diálogos">4.6 Modales y diálogos</h3>
+<ul>
+<li>Foco atrapado dentro del modal; al cerrar, devolver foco al disparador.</li>
+<li>Cierre con <code>Esc</code>, botón de cierre con label accesible y, si aplica, clic fuera.</li>
+<li>Títulos descriptivos (<code>aria-labelledby</code>), sin información crítica solo en el cuerpo.</li>
+</ul>
+<h3 id="47-listas-y-tarjetas">4.7 Listas y tarjetas</h3>
+<ul>
+<li>Estados <code>empty</code>, <code>error</code>, <code>loading</code> definidos para toda lista.</li>
+<li>Acciones de ítem en menú &quot;más opciones&quot; (kebab) con teclado y lector de pantalla.</li>
+<li>Divisores y jerarquía consistentes (título, dato primario, metadato).</li>
+</ul>
+<h3 id="48-componentes-de-dominio">4.8 Componentes de dominio</h3>
+<ul>
+<li><strong>Temporizador de partida</strong>: monoespaciado, anuncia cambios críticos (último minuto) vía <code>aria-live=&quot;polite&quot;</code>.</li>
+<li><strong>Indicador de progreso del oponente</strong>: % de casos superados agregado, sin código ni casos ocultos (PRD RF4.4).</li>
+<li><strong>Badge de Elo</strong>: valor numérico + variación tras partida.</li>
+<li><strong>Editor de código</strong>: tema claro/oscuro, tamaño de fuente configurable, respeto a <code>prefers-reduced-motion</code>.</li>
+</ul>
+<hr>
+<p><a id="pantallas"></a></p>
+<h2 id="5-especificación-por-pantalla">5. Especificación por Pantalla</h2>
+<h3 id="51-registro-e-inicio-de-sesión">5.1 Registro e inicio de sesión</h3>
+<ul>
+<li>Formulario con validación en cliente + servidor (servidor manda).</li>
+<li>Errores específicos sin revelar si un correo existe (PRD RF1.1).</li>
+<li>Estado <code>loading</code> en el botón durante autenticación; deshabilitado para evitar doble envío.</li>
+<li>Tras éxito: redirección con feedback y sesión iniciada.</li>
+</ul>
+<h3 id="52-perfil">5.2 Perfil</h3>
+<ul>
+<li>Datos mínimos: nombre de usuario + Elo actual (RF1.3).</li>
+<li>No exponer correo a terceros ni evidencias de integridad.</li>
+</ul>
+<h3 id="53-cola-de-matchmaking">5.3 Cola de matchmaking</h3>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th>Requisito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estado</td>
+<td><code>loading</code> persistente mientras se busca</td>
+</tr>
+<tr>
+<td>Tiempo</td>
+<td>Cronómetro visible desde el inicio</td>
+</tr>
+<tr>
+<td>Rango Elo</td>
+<td>Mostrar la ventana activa (±100 → ±250 según tiempo, RF3.2)</td>
+</tr>
+<tr>
+<td>Acciones</td>
+<td>Cancelar siempre disponible; al timeout (40s) ofrecer <strong>Reintentar</strong> o <strong>Cancelar</strong> (nunca bot)</td>
+</tr>
+<tr>
+<td>Empty</td>
+<td>No aplica; siempre hay búsqueda activa o acción para iniciarla</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-arena-de-duelo-pantalla-crítica">5.4 Arena de duelo (pantalla crítica)</h3>
+<h4 id="periodo-de-gracia-15-s">Periodo de gracia (15 s)</h4>
+<ul>
+<li>Enunciado de la variante dinámica visible y legible.</li>
+<li>Editor habilitado para leer/escribir, <strong>botón de enviar deshabilitado</strong> con razón visible.</li>
+<li>Temporizador de gracia destacado.</li>
+</ul>
+<h4 id="fase-activa">Fase activa</h4>
+<ul>
+<li>Temporizador oficial (igual para ambos, RF2.4). Aviso visual + sonoro <em>opcional</em> al quedar 1 min.</li>
+<li>Botón <strong>Enviar solución</strong>: estados <code>loading</code> (evaluando), <code>success</code> (progreso), <code>error</code> (fallo con detalle no sensible).</li>
+<li>Progreso propio y del oponente (solo % agregado; sin código ni casos ocultos).</li>
+<li>Código del usuario nunca visible para el oponente.</li>
+</ul>
+<h4 id="desconexión--reconexión">Desconexión / reconexión</h4>
+<ul>
+<li>Banner persistente de &quot;Sin conexión&quot; + contador de 15 s.</li>
+<li>Al reconectar: sincronizar fase, tiempo restante y progreso sin recargar la página.</li>
+<li>Si expira la ventana: pantalla de derrota por desconexión.</li>
+</ul>
+<h3 id="55-pantalla-de-resultado">5.5 Pantalla de resultado</h3>
+<ul>
+<li>Ganador y <strong>motivo exacto</strong>: completitud, progreso parcial, desempate por envíos, empate técnico, desconexión o integridad (RF5.1).</li>
+<li>Progreso de ambos: % de casos ocultos + envíos fallidos.</li>
+<li>Variación de Elo (0 en empate técnico).</li>
+<li>Acciones: volver a cola, ver perfil, ir al inicio.</li>
+<li>Evidencias de integridad: solo indicación general (&quot;finalizada por integridad&quot;), sin detalles privados al oponente (RNF5 / RF6.3).</li>
+</ul>
+<h3 id="56-estados-globales">5.6 Estados globales</h3>
+<ul>
+<li>Error de red global: banner + botón reintentar.</li>
+<li>Mantenimiento/timeout de servidor: pantalla completa con acción de reintento.</li>
+<li>404/permiso denegado: mensaje claro + enlace a inicio.</li>
+</ul>
+<hr>
+<p><a id="accesibilidad"></a></p>
+<h2 id="6-accesibilidad-wcag-21-aa">6. Accesibilidad (WCAG 2.1 AA)</h2>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Criterio de aceptación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contraste</td>
+<td>Texto ≥ 4.5:1; texto grande y componentes UI ≥ 3:1</td>
+</tr>
+<tr>
+<td>Foco visible</td>
+<td>Outline perceptible en todo elemento interactivo (no depender del color)</td>
+</tr>
+<tr>
+<td>Teclado</td>
+<td>Orden lógico de tab; todas las acciones operables sin ratón; <code>Esc</code> cierra modales</td>
+</tr>
+<tr>
+<td>Labels</td>
+<td>Todo control con <code>&lt;label&gt;</code> o <code>aria-label</code>; errores vinculados con <code>aria-describedby</code></td>
+</tr>
+<tr>
+<td>Mensajes de estado</td>
+<td>Cambios dinámicos (progreso, timers críticos, toasts) en regiones <code>aria-live</code></td>
+</tr>
+<tr>
+<td>Tamaño táctil</td>
+<td>≥ 44x44 px en elementos accionables</td>
+</tr>
+<tr>
+<td>Reducción de movimiento</td>
+<td>Respetar <code>prefers-reduced-motion</code>; ofrecer desactivar animaciones no esenciales</td>
+</tr>
+<tr>
+<td>No depender del color</td>
+<td>Iconografía + texto además del color semántico</td>
+</tr>
+<tr>
+<td>Sonido</td>
+<td>Alertas sonoras siempre con alternativa visual (PRD RF4.6)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="rendimiento"></a></p>
+<h2 id="7-rendimiento-y-feedback">7. Rendimiento y Feedback</h2>
+<ul>
+<li><strong>Respuesta visual inmediata</strong> (&lt; 100 ms) a clics/teclas; transiciones de 150–300 ms.</li>
+<li><strong>Carga diferida</strong> de rutas/features y del editor de código.</li>
+<li><strong>Skeletons</strong> sobre contenido que tarda; evitar pantallas en blanco.</li>
+<li><strong>Optimización de la arena</strong>: minimizar re-renders del editor y del temporizador.</li>
+<li><strong>Consistencia con interceptores</strong>: loading global, errores HTTP y <code>traceId</code> ya gestionados en <code>core/</code>; no reimplementar por pantalla.</li>
+</ul>
+<hr>
+<h2 id="checklist">8. Checklist de Revisión UI/UX</h2>
+<p>Antes de dar por terminada cualquier pantalla:</p>
+<ul class="checklist">
+    <li class="checklist-item"><div class="checkbox"></div> Todos los estados (<code>loading</code>, <code>error</code>, <code>empty</code>, <code>disabled</code>, <code>success</code>) implementados donde aplican.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Diseño verificado en ancho ≤ 375 px y en desktop.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Contraste comprobado (herramienta tipo WebAIM).</li>
+    <li class="checklist-item"><div class="checkbox"></div> Navegación completa con teclado y foco visible.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Labels asociados y errores con <code>aria-describedby</code>.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Iconos informativos con texto/aria alternativo; decorativos con <code>aria-hidden="true"</code>.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Mensajes de error específicos y accionables.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Sin color como único canal de información.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Animaciones suaves, cortas y desactivables.</li>
+    <li class="checklist-item"><div class="checkbox"></div> Se reutilizan componentes de <code>shared/</code> e interceptores de <code>core/</code>.</li>
+    <li class="checklist-item"><div class="checkbox"></div> La UI nunca decide el resultado oficial; solo refleja el estado del servidor.</li>
+</ul>
+
+        </main>
+    </div>
+</body>
+</html>

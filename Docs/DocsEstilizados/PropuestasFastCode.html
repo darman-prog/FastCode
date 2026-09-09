@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuestas de Arquitectura — FastCode MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border-color: #334155;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            }
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        
+        .content { padding: 2rem; }
+        
+        h2 {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        h2:first-child { margin-top: 0; }
+        
+        h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+        h4 { font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 1.25rem 0 0.5rem; }
+        
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        strong { color: var(--text-primary); font-weight: 600; }
+        
+        /* Lists */
+        ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        li::marker { color: var(--accent-primary); }
+        
+        /* Tables */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            margin: 1.5rem 0; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        thead { background: var(--bg-tertiary); }
+        th { padding: 0.875rem 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 0.875rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+        tbody tr:hover { background: var(--bg-secondary); }
+        
+        /* Callouts */
+        .callout { padding: 1rem 1.25rem; border-radius: var(--radius-md); margin: 1.5rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .callout-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .callout-content { flex: 1; }
+        .callout-title { font-weight: 600; margin-bottom: 0.25rem; }
+        
+        .callout-note { background: #eff6ff; border-left: 4px solid var(--accent-primary); }
+        .callout-note .callout-title { color: var(--accent-primary); }
+        .callout-important { background: #faf5ff; border-left: 4px solid var(--accent-secondary); }
+        .callout-important .callout-title { color: var(--accent-secondary); }
+        .callout-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .callout-warning .callout-title { color: var(--warning); }
+        .callout-tip { background: #ecfdf5; border-left: 4px solid var(--success); }
+        .callout-tip .callout-title { color: var(--success); }
+        .callout-caution { background: #fef2f2; border-left: 4px solid var(--error); }
+        .callout-caution .callout-title { color: var(--error); }
+        
+        @media (prefers-color-scheme: dark) {
+            .callout-note { background: #1e3a5f; }
+            .callout-important { background: #2e1065; }
+            .callout-warning { background: #451a03; }
+            .callout-tip { background: #064e3b; }
+            .callout-caution { background: #450a0a; }
+        }
+        
+        /* Code */
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.875em; color: var(--accent-secondary); }
+        pre { background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; margin: 1rem 0; }
+        pre code { background: none; padding: 0; color: var(--text-primary); }
+        
+        /* Divider */
+        hr { border: none; height: 1px; background: var(--border-color); margin: 2rem 0; }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .container { border-radius: 0; }
+            .content { padding: 1.5rem 1rem; }
+            .header { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🏗️ Propuestas de Arquitectura — FastCode MVP</h1>
+            <span class="header-badge">Stack Tecnológico y Decisiones Técnicas</span>
+        </header>
+        <main class="content">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Versión:</strong> 1.0</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Fecha:</strong> 2026-08-28</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Basado en:</strong> PRD FastCode MVP v2.0</span>
+            </div>
+<hr>
+<h2 id="índice">Índice</h2>
+<ol>
+<li><a href="#restricciones">Resumen de Restricciones Técnicas del PRD</a></li>
+<li><a href="#arquitectura">Propuesta de Arquitectura General</a></li>
+<li><a href="#propuesta-a">Propuesta A — Stack Recomendado (Node.js + React)</a></li>
+<li><a href="#propuesta-b">Propuesta B — Stack Alternativo (Go + React)</a></li>
+<li><a href="#propuesta-c">Propuesta C — Stack Python (Django/FastAPI + React)</a></li>
+<li><a href="#tiempo-real">Comunicación en Tiempo Real</a></li>
+<li><a href="#persistencia">Persistencia y Bases de Datos</a></li>
+<li><a href="#sandbox">Ejecución Aislada de Código (Sandbox)</a></li>
+<li><a href="#variantes">Generación de Variantes Dinámicas</a></li>
+<li><a href="#observabilidad">Observabilidad y Telemetría</a></li>
+<li><a href="#despliegue">Despliegue e Infraestructura</a></li>
+<li><a href="#comparativa">Comparativa de Propuestas</a></li>
+<li><a href="#recomendacion">Recomendación Final</a></li>
+<li><a href="#modelo-negocio">Modelo de Negocio y Monetización</a></li>
+<li><a href="#estrategia-crecimiento">Estrategia de Crecimiento y Captación</a></li>
+<li><a href="#proyeccion-financiera">Proyección Financiera del MVP</a></li>
+<li><a href="#roadmap-monetizacion">Roadmap de Monetización por Fases</a></li>
+</ol>
+<hr>
+<p><a id="restricciones"></a></p>
+<h2 id="1-resumen-de-restricciones-técnicas-del-prd">1. Resumen de Restricciones Técnicas del PRD</h2>
+<p>Antes de proponer cualquier stack, es importante tener presentes los requisitos no funcionales que condicionan las decisiones técnicas:</p>
+<table>
+<thead>
+<tr>
+<th>Requisito</th>
+<th>Valor objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latencia p95 de eventos en tiempo real</td>
+<td>&lt; 150 ms</td>
+</tr>
+<tr>
+<td>Evaluación de envíos (p95)</td>
+<td>&lt; 5 segundos</td>
+</tr>
+<tr>
+<td>Capacidad simultánea</td>
+<td>100 partidas / 200 usuarios</td>
+</tr>
+<tr>
+<td>Reconexión</td>
+<td>Ventana de 15 segundos con sincronización de estado</td>
+</tr>
+<tr>
+<td>Ejecución de código</td>
+<td>Aislada, sin acceso a red ni datos de otros usuarios</td>
+</tr>
+<tr>
+<td>Accesibilidad</td>
+<td>WCAG 2.1 AA</td>
+</tr>
+<tr>
+<td>Responsive</td>
+<td>Pantallas pequeñas y grandes</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="arquitectura"></a></p>
+<h2 id="2-propuesta-de-arquitectura-general">2. Propuesta de Arquitectura General</h2>
+<p>Independientemente del stack elegido, la arquitectura se organiza en estas capas:</p>
+<pre class="mermaid" style="all: unset;">graph TB
+    subgraph Cliente
+        A["SPA (Single Page Application)"]
+    end
+
+    subgraph API Gateway / Load Balancer
+        B["Reverse Proxy + TLS"]
+    end
+
+    subgraph Servicios Backend
+        C["Auth Service"]
+        D["Matchmaking Service"]
+        E["Game Engine Service"]
+        F["Submission Service"]
+        G["Integrity Service"]
+    end
+
+    subgraph Ejecución Aislada
+        H["Sandbox / Code Runner"]
+    end
+
+    subgraph Persistencia
+        I["Base de Datos Relacional"]
+        J["Cache / Estado en Memoria"]
+        K["Cola de Mensajes"]
+    end
+
+    A &lt;--&gt;|WebSocket + REST| B
+    B --&gt; C
+    B --&gt; D
+    B --&gt; E
+    B --&gt; F
+    B --&gt; G
+    F --&gt; H
+    C --&gt; I
+    D --&gt; J
+    E --&gt; I
+    E --&gt; J
+    F --&gt; K
+    G --&gt; I</pre>
+<h3 id="servicios-principales">Servicios Principales</h3>
+<table>
+<thead>
+<tr>
+<th>Servicio</th>
+<th>Responsabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auth Service</strong></td>
+<td>Registro, login, sesiones, tokens JWT</td>
+</tr>
+<tr>
+<td><strong>Matchmaking Service</strong></td>
+<td>Cola de espera, búsqueda por ventanas de Elo, emparejamiento</td>
+</tr>
+<tr>
+<td><strong>Game Engine Service</strong></td>
+<td>Ciclo de vida de la partida, estados, temporizadores, periodo de gracia, reconexión</td>
+</tr>
+<tr>
+<td><strong>Submission Service</strong></td>
+<td>Recepción de envíos, delegación al sandbox, resultado oficial</td>
+</tr>
+<tr>
+<td><strong>Integrity Service</strong></td>
+<td>Recepción de telemetría del cliente, clasificación de evidencias, sanciones</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-important"><p class="markdown-alert-title"><svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p><p>En el MVP se recomienda un <strong>monolito modular</strong> con separación lógica por módulos, no microservicios independientes. Esto reduce la complejidad operativa sin sacrificar la organización interna. La separación en servicios desplegables por separado puede hacerse después del piloto.</p>
+</div>
+<hr>
+<p><a id="propuesta-a"></a></p>
+<h2 id="3-propuesta-a--stack-recomendado-nodejs--react">3. Propuesta A — Stack Recomendado (Node.js + React)</h2>
+<h3 id="frontend">Frontend</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Elección</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework</td>
+<td><strong>React 19 + TypeScript</strong></td>
+<td>Ecosistema maduro, amplia comunidad, excelente para SPAs interactivas</td>
+</tr>
+<tr>
+<td>Build tool</td>
+<td><strong>Vite</strong></td>
+<td>Bundling rápido, HMR instantáneo, configuración mínima</td>
+</tr>
+<tr>
+<td>Estado global</td>
+<td><strong>Zustand</strong></td>
+<td>Ligero, simple, ideal para estado de partida en tiempo real</td>
+</tr>
+<tr>
+<td>Editor de código</td>
+<td><strong>Monaco Editor</strong> (VS Code)</td>
+<td>Soporte completo de lenguajes, personalizable, accesible</td>
+</tr>
+<tr>
+<td>Estilos</td>
+<td><strong>Tailwind CSS 4</strong></td>
+<td>Utility-first, responsive por defecto, consistente</td>
+</tr>
+<tr>
+<td>WebSocket client</td>
+<td><strong><a href="http://Socket.IO">Socket.IO</a> Client</strong></td>
+<td>Reconexión automática, fallbacks, rooms</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td><strong>React Router v7</strong></td>
+<td>Estándar de la industria para SPAs React</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td><strong>Vitest + Testing Library</strong></td>
+<td>Rápido, compatible con Vite, buenas prácticas de testing</td>
+</tr>
+</tbody>
+</table>
+<h3 id="backend">Backend</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Elección</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime</td>
+<td><strong>Node.js 22 LTS</strong></td>
+<td>Event loop ideal para WebSockets y alta concurrencia de I/O</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td><strong>NestJS + TypeScript</strong></td>
+<td>Modular, inyección de dependencias, estructura escalable tipo monolito modular</td>
+</tr>
+<tr>
+<td>WebSocket server</td>
+<td><strong><a href="http://Socket.IO">Socket.IO</a></strong></td>
+<td>Rooms para partidas, reconexión nativa, namespaces</td>
+</tr>
+<tr>
+<td>Autenticación</td>
+<td><strong>JWT (access + refresh tokens)</strong></td>
+<td>Stateless, compatible con WebSockets</td>
+</tr>
+<tr>
+<td>Hashing</td>
+<td><strong>bcrypt o Argon2</strong></td>
+<td>Estándar para contraseñas</td>
+</tr>
+<tr>
+<td>Validación</td>
+<td><strong>class-validator + class-transformer</strong></td>
+<td>Decoradores integrados con NestJS</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td><strong>Prisma</strong></td>
+<td>Type-safe, migraciones, buen DX con TypeScript</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td><strong>Jest + Supertest</strong></td>
+<td>Integrado con NestJS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ventajas-de-esta-propuesta">Ventajas de esta propuesta</h3>
+<ul>
+<li><strong>TypeScript end-to-end</strong>: tipos compartidos entre frontend y backend</li>
+<li><strong>Gran ecosistema</strong>: librerías maduras para cada necesidad</li>
+<li><strong>Event loop de Node.js</strong>: excelente para WebSockets y operaciones de I/O concurrentes</li>
+<li><strong>NestJS</strong>: estructura empresarial que facilita escalar de monolito a servicios</li>
+</ul>
+<h3 id="desventajas">Desventajas</h3>
+<ul>
+<li>Node.js no es ideal para computación intensiva (mitigado: la ejecución de código va al sandbox)</li>
+<li><a href="http://Socket.IO">Socket.IO</a> añade overhead sobre WebSockets puros (aceptable para 200 usuarios concurrentes)</li>
+</ul>
+<hr>
+<p><a id="propuesta-b"></a></p>
+<h2 id="4-propuesta-b--stack-alternativo-go--react">4. Propuesta B — Stack Alternativo (Go + React)</h2>
+<h3 id="frontend-1">Frontend</h3>
+<p>Idéntico a la Propuesta A (React 19 + TypeScript + Vite + Monaco + Tailwind).</p>
+<h3 id="backend-1">Backend</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Elección</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lenguaje</td>
+<td><strong>Go 1.23</strong></td>
+<td>Alto rendimiento, goroutines para concurrencia, binarios compilados</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td><strong>Fiber o Echo</strong></td>
+<td>Ligeros, rápidos, buen ecosistema de middleware</td>
+</tr>
+<tr>
+<td>WebSocket server</td>
+<td><strong>gorilla/websocket o nhooyr/websocket</strong></td>
+<td>WebSockets nativos con goroutines por conexión</td>
+</tr>
+<tr>
+<td>Autenticación</td>
+<td><strong>JWT con golang-jwt</strong></td>
+<td>Estándar, buen rendimiento</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td><strong>GORM o sqlc</strong></td>
+<td>GORM para productividad, sqlc para rendimiento y type-safety</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td><strong>testing + testify</strong></td>
+<td>Estándar de Go</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ventajas">Ventajas</h3>
+<ul>
+<li><strong>Rendimiento superior</strong>: goroutines manejan miles de conexiones WebSocket con mínima memoria</li>
+<li><strong>Binarios compilados</strong>: despliegue simple, sin runtime externo</li>
+<li><strong>Baja latencia</strong>: ideal para cumplir el p95 &lt; 150ms incluso bajo carga</li>
+</ul>
+<h3 id="desventajas-1">Desventajas</h3>
+<ul>
+<li><strong>Dos lenguajes</strong>: TypeScript en frontend, Go en backend (no se comparten tipos)</li>
+<li><strong>Ecosistema más pequeño</strong>: menos librerías &quot;listas para usar&quot; comparado con Node.js</li>
+<li><strong>Curva de aprendizaje</strong>: Go requiere conocimiento específico del equipo</li>
+<li><strong>Desarrollo más lento</strong>: Go es más verboso que TypeScript para lógica de negocio</li>
+</ul>
+<hr>
+<p><a id="propuesta-c"></a></p>
+<h2 id="5-propuesta-c--stack-python-fastapi--react">5. Propuesta C — Stack Python (FastAPI + React)</h2>
+<h3 id="frontend-2">Frontend</h3>
+<p>Idéntico a la Propuesta A (React 19 + TypeScript + Vite + Monaco + Tailwind).</p>
+<h3 id="backend-2">Backend</h3>
+<table>
+<thead>
+<tr>
+<th>Decisión</th>
+<th>Elección</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lenguaje</td>
+<td><strong>Python 3.12+</strong></td>
+<td>Popular, fácil de reclutar, excelente para prototipado rápido</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td><strong>FastAPI</strong></td>
+<td>Async nativo, auto-documentación OpenAPI, validación con Pydantic</td>
+</tr>
+<tr>
+<td>WebSocket server</td>
+<td><strong>FastAPI WebSockets (Starlette)</strong></td>
+<td>Integrado, async nativo</td>
+</tr>
+<tr>
+<td>Autenticación</td>
+<td><strong>python-jose + passlib</strong></td>
+<td>JWT estándar con hashing seguro</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td><strong>SQLAlchemy 2.0 + Alembic</strong></td>
+<td>Async, maduro, migraciones robustas</td>
+</tr>
+<tr>
+<td>Task queue</td>
+<td><strong>Celery + Redis</strong></td>
+<td>Para orquestar evaluaciones de código asíncronas</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td><strong>pytest + httpx</strong></td>
+<td>Estándar de la industria en Python</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ventajas-1">Ventajas</h3>
+<ul>
+<li><strong>Velocidad de desarrollo</strong>: Python permite iterar muy rápido en el MVP</li>
+<li><strong>FastAPI</strong>: rendimiento async competitivo, documentación automática</li>
+<li><strong>Fácil contratación</strong>: Python es uno de los lenguajes más populares</li>
+</ul>
+<h3 id="desventajas-2">Desventajas</h3>
+<ul>
+<li><strong>Rendimiento en WebSockets</strong>: Python async es más lento que Node.js y significativamente más lento que Go para conexiones concurrentes</li>
+<li><strong>GIL</strong>: aunque FastAPI es async, el GIL limita la concurrencia CPU-bound</li>
+<li><strong>Dos lenguajes</strong>: no comparte tipos con el frontend TypeScript</li>
+<li><strong>Mayor consumo de memoria</strong> por conexión WebSocket comparado con Go y Node.js</li>
+</ul>
+<hr>
+<p><a id="tiempo-real"></a></p>
+<h2 id="6-comunicación-en-tiempo-real">6. Comunicación en Tiempo Real</h2>
+<h3 id="protocolo-websockets">Protocolo: WebSockets</h3>
+<p>La comunicación bidireccional en tiempo real es esencial para:</p>
+<ul>
+<li>Progreso del oponente en vivo (RF4.5)</li>
+<li>Cambios de estado de la partida (RF4.1)</li>
+<li>Alertas de actividad (RF4.6)</li>
+<li>Reconexión y sincronización (RNF3)</li>
+</ul>
+<h3 id="diseño-de-canalesrooms">Diseño de Canales/Rooms</h3>
+<pre><code>match:{matchId}           → Canal de la partida (ambos jugadores)
+match:{matchId}:player:{userId} → Canal privado del jugador
+matchmaking:queue         → Canal de la cola de matchmaking
+user:{userId}             → Canal personal (notificaciones)
+</code></pre>
+<h3 id="eventos-principales">Eventos Principales</h3>
+<table>
+<thead>
+<tr>
+<th>Evento</th>
+<th>Dirección</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>match:found</code></td>
+<td>Server → Client</td>
+<td>Emparejamiento encontrado</td>
+</tr>
+<tr>
+<td><code>match:state_change</code></td>
+<td>Server → Client</td>
+<td>Cambio de fase (gracia → activa → finalizada)</td>
+</tr>
+<tr>
+<td><code>match:timer_sync</code></td>
+<td>Server → Client</td>
+<td>Sincronización de temporizador</td>
+</tr>
+<tr>
+<td><code>opponent:progress</code></td>
+<td>Server → Client</td>
+<td>Progreso agregado del oponente</td>
+</tr>
+<tr>
+<td><code>submission:result</code></td>
+<td>Server → Client</td>
+<td>Resultado de un envío oficial</td>
+</tr>
+<tr>
+<td><code>integrity:warning</code></td>
+<td>Server → Client</td>
+<td>Advertencia de integridad</td>
+</tr>
+<tr>
+<td><code>client:submit</code></td>
+<td>Client → Server</td>
+<td>Envío de solución</td>
+</tr>
+<tr>
+<td><code>client:integrity_event</code></td>
+<td>Client → Server</td>
+<td>Evento de telemetría del cliente</td>
+</tr>
+<tr>
+<td><code>client:reconnect</code></td>
+<td>Client → Server</td>
+<td>Solicitud de reconexión</td>
+</tr>
+</tbody>
+</table>
+<h3 id="estrategia-de-reconexión">Estrategia de Reconexión</h3>
+<pre class="mermaid" style="all: unset;">sequenceDiagram
+    participant C as Cliente
+    participant S as Servidor
+
+    Note over C,S: Conexión perdida
+    C-&gt;&gt;S: Intento de reconexión (con token + matchId)
+    alt Dentro de 15 segundos
+        S-&gt;&gt;C: Estado actual de la partida
+        S-&gt;&gt;C: Tiempo restante sincronizado
+        S-&gt;&gt;C: Progreso del jugador y del oponente
+        Note over C: Partida restaurada
+    else Fuera de ventana
+        S-&gt;&gt;C: Partida finalizada (derrota por desconexión)
+    end</pre>
+<hr>
+<p><a id="persistencia"></a></p>
+<h2 id="7-persistencia-y-bases-de-datos">7. Persistencia y Bases de Datos</h2>
+<h3 id="base-de-datos-principal-postgresql">Base de Datos Principal: PostgreSQL</h3>
+<table>
+<thead>
+<tr>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relacional, ACID, excelente para datos estructurados (usuarios, partidas, envíos)</td>
+</tr>
+<tr>
+<td>Soporte nativo de JSON para almacenar variantes y metadatos flexibles</td>
+</tr>
+<tr>
+<td>Extensiones como <code>pgcrypto</code> para funciones de seguridad</td>
+</tr>
+<tr>
+<td>Escalable verticalmente para las necesidades del MVP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="cache-y-estado-en-tiempo-real-redis">Cache y Estado en Tiempo Real: Redis</h3>
+<table>
+<thead>
+<tr>
+<th>Uso</th>
+<th>Justificación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Estado de partidas activas</td>
+<td>Acceso rápido O(1), TTL automático</td>
+</tr>
+<tr>
+<td>Cola de matchmaking</td>
+<td>Sorted Sets con Elo como score, operaciones atómicas</td>
+</tr>
+<tr>
+<td>Sesiones y tokens de reconexión</td>
+<td>Expiración automática (15s para reconexión)</td>
+</tr>
+<tr>
+<td>Rate limiting</td>
+<td>Contadores con expiración para RNF2.4</td>
+</tr>
+<tr>
+<td>Pub/Sub</td>
+<td>Comunicación entre instancias del servidor (si hay varias)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="esquema-conceptual-de-entidades">Esquema Conceptual de Entidades</h3>
+<pre class="mermaid" style="all: unset;">erDiagram
+    USER {
+        uuid id PK
+        string email UK
+        string username UK
+        string password_hash
+        int elo
+        timestamp created_at
+    }
+
+    PROBLEM {
+        uuid id PK
+        string title
+        enum difficulty "easy | medium | hard"
+        text description_template
+        json variable_pool
+        int time_limit_seconds
+        timestamp created_at
+    }
+
+    TEST_CASE {
+        uuid id PK
+        uuid problem_id FK
+        text input
+        text expected_output
+        boolean is_public
+    }
+
+    MATCH {
+        uuid id PK
+        uuid player1_id FK
+        uuid player2_id FK
+        uuid problem_id FK
+        json dynamic_variant
+        enum status "queued | matched | grace | active | finished | cancelled"
+        enum finish_reason "completion | timeout | disconnect | integrity | cancel"
+        uuid winner_id FK "nullable"
+        timestamp started_at
+        timestamp finished_at
+        int elo_change_p1
+        int elo_change_p2
+    }
+
+    SUBMISSION {
+        uuid id PK
+        uuid match_id FK
+        uuid player_id FK
+        text code
+        int passed_cases
+        int total_cases
+        boolean is_complete
+        timestamp submitted_at
+    }
+
+    INTEGRITY_EVENT {
+        uuid id PK
+        uuid match_id FK
+        uuid player_id FK
+        enum level "low | moderate | severe"
+        string event_type
+        int duration_ms "nullable"
+        string action_taken
+        timestamp occurred_at
+    }
+
+    USER ||--o{ MATCH : "participa en"
+    PROBLEM ||--o{ TEST_CASE : "tiene"
+    PROBLEM ||--o{ MATCH : "asignado a"
+    MATCH ||--o{ SUBMISSION : "contiene"
+    MATCH ||--o{ INTEGRITY_EVENT : "registra"
+    USER ||--o{ SUBMISSION : "envía"
+    USER ||--o{ INTEGRITY_EVENT : "genera"</pre>
+<hr>
+<p><a id="sandbox"></a></p>
+<h2 id="8-ejecución-aislada-de-código-sandbox">8. Ejecución Aislada de Código (Sandbox)</h2>
+<p>Esta es una de las decisiones más críticas del proyecto. El código del usuario debe ejecutarse de forma segura, aislada y con límites estrictos.</p>
+<h3 id="opción-1-contenedores-efímeros-con-docker-recomendada-para-mvp">Opción 1: Contenedores efímeros con Docker (Recomendada para MVP)</h3>
+<pre class="mermaid" style="all: unset;">sequenceDiagram
+    participant S as Submission Service
+    participant Q as Cola de Tareas
+    participant W as Worker
+    participant D as Contenedor Docker
+
+    S-&gt;&gt;Q: Encolar envío
+    Q-&gt;&gt;W: Asignar a worker disponible
+    W-&gt;&gt;D: Crear contenedor efímero
+    Note over D: Sin red, sin volúmenes compartidos
+    Note over D: Límites de CPU, memoria, tiempo
+    D-&gt;&gt;D: Compilar + ejecutar contra casos ocultos
+    D-&gt;&gt;W: Resultado (stdout, stderr, exit code)
+    W-&gt;&gt;W: Destruir contenedor
+    W-&gt;&gt;S: Resultado oficial</pre>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>Configuración</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Red</td>
+<td><code>--network=none</code></td>
+</tr>
+<tr>
+<td>Filesystem</td>
+<td>Solo lectura excepto /tmp</td>
+</tr>
+<tr>
+<td>CPU</td>
+<td>Limitado por <code>--cpus</code></td>
+</tr>
+<tr>
+<td>Memoria</td>
+<td>Limitado por <code>--memory</code></td>
+</tr>
+<tr>
+<td>Tiempo</td>
+<td>Timeout controlado por el worker</td>
+</tr>
+<tr>
+<td>Procesos</td>
+<td>Limitados por <code>--pids-limit</code></td>
+</tr>
+<tr>
+<td>Usuario</td>
+<td>Non-root dentro del contenedor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="opción-2-plataforma-como-servicio-judge0-piston">Opción 2: Plataforma como servicio (Judge0, Piston)</h3>
+<table>
+<thead>
+<tr>
+<th>Plataforma</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Judge0</strong></td>
+<td>API open-source de ejecución de código, auto-hospedable, soporta 60+ lenguajes</td>
+</tr>
+<tr>
+<td><strong>Piston</strong></td>
+<td>Motor de ejecución ligero, fácil de desplegar, API REST</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ventaja</strong>: Menos trabajo de infraestructura propio.<br>
+<strong>Desventaja</strong>: Dependencia externa, menos control sobre el aislamiento y los tiempos.</p>
+<h3 id="opción-3-sandbox-nativo-gvisor--nsjail">Opción 3: Sandbox nativo (gVisor / nsjail)</h3>
+<table>
+<thead>
+<tr>
+<th>Herramienta</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>gVisor (runsc)</strong></td>
+<td>Runtime de contenedores de Google que intercepta syscalls</td>
+</tr>
+<tr>
+<td><strong>nsjail</strong></td>
+<td>Sandbox ligero basado en namespaces de Linux</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Ventaja</strong>: Mayor aislamiento que Docker estándar.<br>
+<strong>Desventaja</strong>: Mayor complejidad de configuración, requiere Linux.</p>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p><strong>Para el MVP se recomienda la Opción 1 (Docker efímero)</strong> con un pool pre-calentado de contenedores. Esto equilibra seguridad, simplicidad y rendimiento. Si se necesita mayor aislamiento, se puede migrar el runtime a gVisor sin cambiar la arquitectura.</p>
+</div>
+<h3 id="lenguaje-soportado-para-el-mvp">Lenguaje Soportado para el MVP</h3>
+<p>Se recomienda comenzar con <strong>un solo lenguaje</strong> para simplificar el sandbox, la evaluación y las variantes dinámicas:</p>
+<table>
+<thead>
+<tr>
+<th>Candidato</th>
+<th>Ventajas</th>
+<th>Desventajas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>JavaScript (Node.js)</strong></td>
+<td>Muy popular, ejecución rápida, mismo ecosistema que el backend</td>
+<td>Tipado débil puede dificultar problemas algorítmicos</td>
+</tr>
+<tr>
+<td><strong>Python</strong></td>
+<td>Extremadamente popular, sintaxis clara, ideal para algoritmos</td>
+<td>Más lento en ejecución, requiere ajustar timeouts</td>
+</tr>
+<tr>
+<td><strong>Java</strong></td>
+<td>Tipado fuerte, popular en competitiva</td>
+<td>Tiempo de arranque de JVM, mayor consumo de memoria</td>
+</tr>
+<tr>
+<td><strong>C++</strong></td>
+<td>Rendimiento máximo, estándar en programación competitiva</td>
+<td>Mayor complejidad para principiantes, errores de memoria</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-important"><p class="markdown-alert-title"><svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p><p><strong>Recomendación: Python como lenguaje inicial.</strong> Es el más accesible, el más popular en la comunidad de programación y algoritmia, y la lentitud de ejecución se mitiga ajustando los timeouts. Permite que el MVP llegue a la mayor audiencia posible.</p>
+</div>
+<hr>
+<p><a id="variantes"></a></p>
+<h2 id="9-generación-de-variantes-dinámicas">9. Generación de Variantes Dinámicas</h2>
+<h3 id="mecanismo-propuesto">Mecanismo Propuesto</h3>
+<p>Cada problema almacena una <strong>plantilla parametrizable</strong> y un <strong>pool de variables</strong>:</p>
+<pre><code>Plantilla del enunciado:
+  &quot;Escribe una función llamada {{function_name}} que reciba
+   un arreglo de enteros llamado {{param_name}} y retorne...&quot;
+
+Pool de variables:
+  function_name: [&quot;resolver&quot;, &quot;calcular&quot;, &quot;procesar&quot;, &quot;encontrar&quot;, &quot;computar&quot;]
+  param_name: [&quot;datos&quot;, &quot;numeros&quot;, &quot;valores&quot;, &quot;elementos&quot;, &quot;lista&quot;]
+</code></pre>
+<h3 id="flujo-de-generación">Flujo de Generación</h3>
+<pre class="mermaid" style="all: unset;">flowchart LR
+    A["Selección de problema"] --&gt; B["Selección aleatoria de variables del pool"]
+    B --&gt; C["Renderizado de plantilla del enunciado"]
+    C --&gt; D["Adaptación de casos de prueba"]
+    D --&gt; E{"¿Validación OK?"}
+    E --&gt;|Sí| F["Entregar variante a ambos jugadores"]
+    E --&gt;|No| G["Reintentar con otras variables o abortar"]</pre>
+<h3 id="validación-de-variantes">Validación de Variantes</h3>
+<p>Antes de entregar una variante, el sistema debe verificar:</p>
+<ol>
+<li>La plantilla se renderiza sin errores</li>
+<li>Los casos públicos son coherentes con la variante</li>
+<li>Los casos ocultos producen resultados esperados con una solución de referencia</li>
+<li>Los nombres de funciones/variables son identificadores válidos en el lenguaje elegido</li>
+</ol>
+<hr>
+<p><a id="observabilidad"></a></p>
+<h2 id="10-observabilidad-y-telemetría">10. Observabilidad y Telemetría</h2>
+<h3 id="stack-de-observabilidad">Stack de Observabilidad</h3>
+<table>
+<thead>
+<tr>
+<th>Capa</th>
+<th>Herramienta</th>
+<th>Propósito</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Logs</td>
+<td><strong>Pino</strong> (Node.js) o <strong>zerolog</strong> (Go)</td>
+<td>Logs estructurados en JSON</td>
+</tr>
+<tr>
+<td>Métricas</td>
+<td><strong>Prometheus + Grafana</strong></td>
+<td>Dashboards de latencia, partidas, errores</td>
+</tr>
+<tr>
+<td>Trazas</td>
+<td><strong>OpenTelemetry</strong></td>
+<td>Trazas distribuidas entre servicios</td>
+</tr>
+<tr>
+<td>Alertas</td>
+<td><strong>Grafana Alerting</strong></td>
+<td>Alertas por umbrales de latencia o errores</td>
+</tr>
+</tbody>
+</table>
+<h3 id="métricas-clave-a-instrumentar-según-prd-7">Métricas Clave a Instrumentar (según PRD §7)</h3>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Tipo</th>
+<th>Etiquetas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>matchmaking_duration_seconds</code></td>
+<td>Histograma</td>
+<td><code>result: matched|timeout</code></td>
+</tr>
+<tr>
+<td><code>match_completion_rate</code></td>
+<td>Contador</td>
+<td><code>finish_reason</code></td>
+</tr>
+<tr>
+<td><code>submission_evaluation_duration_seconds</code></td>
+<td>Histograma</td>
+<td><code>language, difficulty</code></td>
+</tr>
+<tr>
+<td><code>websocket_event_latency_seconds</code></td>
+<td>Histograma</td>
+<td><code>event_type</code></td>
+</tr>
+<tr>
+<td><code>integrity_events_total</code></td>
+<td>Contador</td>
+<td><code>level, event_type</code></td>
+</tr>
+<tr>
+<td><code>active_matches_total</code></td>
+<td>Gauge</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>active_websocket_connections</code></td>
+<td>Gauge</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="despliegue"></a></p>
+<h2 id="11-despliegue-e-infraestructura">11. Despliegue e Infraestructura</h2>
+<h3 id="opción-1-vps--servidor-dedicado-recomendada-para-mvp">Opción 1: VPS / Servidor Dedicado (Recomendada para MVP)</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Sugerencia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Proveedor</td>
+<td><strong>DigitalOcean, Hetzner o AWS Lightsail</strong></td>
+</tr>
+<tr>
+<td>Servidor</td>
+<td>4 vCPU, 8 GB RAM (suficiente para 100 partidas)</td>
+</tr>
+<tr>
+<td>Reverse Proxy</td>
+<td><strong>Nginx o Caddy</strong> (TLS automático con Caddy)</td>
+</tr>
+<tr>
+<td>Contenedores</td>
+<td><strong>Docker Compose</strong> para orquestar servicios</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td><strong>GitHub Actions</strong> → build → test → deploy via SSH</td>
+</tr>
+<tr>
+<td>Base de datos</td>
+<td>PostgreSQL en el mismo servidor o servicio managed</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>En el mismo servidor</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Costo estimado</strong>: $20-50 USD/mes para el MVP.</p>
+<h3 id="opción-2-cloud-managed-aws--gcp">Opción 2: Cloud Managed (AWS / GCP)</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Servicio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cómputo</td>
+<td><strong>AWS ECS Fargate</strong> o <strong>GCP Cloud Run</strong></td>
+</tr>
+<tr>
+<td>Base de datos</td>
+<td><strong>AWS RDS PostgreSQL</strong> o <strong>GCP Cloud SQL</strong></td>
+</tr>
+<tr>
+<td>Cache</td>
+<td><strong>AWS ElastiCache Redis</strong> o <strong>GCP Memorystore</strong></td>
+</tr>
+<tr>
+<td>Load Balancer</td>
+<td><strong>AWS ALB</strong> (soporte WebSocket)</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td><strong>GitHub Actions + AWS CDK/Terraform</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Costo estimado</strong>: $80-150 USD/mes para el MVP.</p>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p><strong>Para el MVP se recomienda la Opción 1 (VPS con Docker Compose).</strong> Es significativamente más barata, más simple de operar y suficiente para la escala del MVP (100 partidas / 200 usuarios). La migración a cloud managed se puede hacer cuando se necesite escalar.</p>
+</div>
+<h3 id="estructura-de-docker-compose">Estructura de Docker Compose</h3>
+<pre><code>services:
+  app:        # Backend (NestJS / Go / FastAPI)
+  frontend:   # Nginx sirviendo el build de React
+  postgres:   # Base de datos
+  redis:      # Cache y estado en tiempo real
+  sandbox:    # Pool de contenedores para ejecución de código
+  prometheus: # Métricas (opcional en MVP inicial)
+  grafana:    # Dashboards (opcional en MVP inicial)
+</code></pre>
+<hr>
+<p><a id="comparativa"></a></p>
+<h2 id="12-comparativa-de-propuestas">12. Comparativa de Propuestas</h2>
+<table>
+<thead>
+<tr>
+<th>Criterio</th>
+<th style="text-align:center">Propuesta A (Node.js)</th>
+<th style="text-align:center">Propuesta B (Go)</th>
+<th style="text-align:center">Propuesta C (Python)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Velocidad de desarrollo</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Rendimiento WebSockets</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Ecosistema y librerías</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>TypeScript end-to-end</td>
+<td style="text-align:center">✅</td>
+<td style="text-align:center">❌</td>
+<td style="text-align:center">❌</td>
+</tr>
+<tr>
+<td>Facilidad de contratación</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Rendimiento computacional</td>
+<td style="text-align:center">⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐</td>
+</tr>
+<tr>
+<td>Complejidad de despliegue</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td>Madurez para monolito modular</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐ (NestJS)</td>
+<td style="text-align:center">⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐ (FastAPI)</td>
+</tr>
+<tr>
+<td>Idoneidad para el MVP</td>
+<td style="text-align:center">⭐⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+<td style="text-align:center">⭐⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="recomendacion"></a></p>
+<h2 id="13-recomendación-final">13. Recomendación Final</h2>
+<h3 id="stack-recomendado-para-el-mvp">Stack Recomendado para el MVP</h3>
+<table>
+<thead>
+<tr>
+<th>Capa</th>
+<th>Tecnología</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Frontend</strong></td>
+<td>React 19 + TypeScript + Vite + Tailwind CSS</td>
+</tr>
+<tr>
+<td><strong>Editor</strong></td>
+<td>Monaco Editor</td>
+</tr>
+<tr>
+<td><strong>Backend</strong></td>
+<td>NestJS + TypeScript (Node.js 22 LTS)</td>
+</tr>
+<tr>
+<td><strong>Tiempo real</strong></td>
+<td><a href="http://Socket.IO">Socket.IO</a> (WebSockets)</td>
+</tr>
+<tr>
+<td><strong>Base de datos</strong></td>
+<td>PostgreSQL 16</td>
+</tr>
+<tr>
+<td><strong>Cache / Estado</strong></td>
+<td>Redis 7</td>
+</tr>
+<tr>
+<td><strong>ORM</strong></td>
+<td>Prisma</td>
+</tr>
+<tr>
+<td><strong>Sandbox</strong></td>
+<td>Docker efímero (contenedores sin red)</td>
+</tr>
+<tr>
+<td><strong>Lenguaje del duelo</strong></td>
+<td>Python 3.12</td>
+</tr>
+<tr>
+<td><strong>Autenticación</strong></td>
+<td>JWT (access + refresh tokens) + bcrypt</td>
+</tr>
+<tr>
+<td><strong>Despliegue</strong></td>
+<td>VPS + Docker Compose + Caddy</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions</td>
+</tr>
+<tr>
+<td><strong>Observabilidad</strong></td>
+<td>Pino (logs) + Prometheus + Grafana</td>
+</tr>
+</tbody>
+</table>
+<h3 id="justificación">Justificación</h3>
+<ol>
+<li><strong>TypeScript end-to-end</strong> acelera el desarrollo y reduce errores entre frontend y backend.</li>
+<li><strong>NestJS</strong> ofrece estructura de monolito modular con inyección de dependencias, ideal para crecer de MVP a producto.</li>
+<li><strong><a href="http://Socket.IO">Socket.IO</a></strong> resuelve reconexión, rooms y fallbacks con mínima configuración.</li>
+<li><strong>PostgreSQL + Redis</strong> cubren persistencia ACID y estado en tiempo real respectivamente.</li>
+<li><strong>Docker efímero</strong> proporciona aislamiento suficiente para el MVP sin complejidad excesiva.</li>
+<li><strong>Python como lenguaje de duelo</strong> maximiza la audiencia potencial.</li>
+<li><strong>VPS + Docker Compose</strong> minimiza costos y complejidad operativa para el piloto.</li>
+</ol>
+<div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p><p>Esta propuesta es un punto de partida. Cada decisión debe validarse con las capacidades del equipo de desarrollo, el presupuesto disponible y los resultados del piloto. Las tecnologías marcadas como &quot;opcionales&quot; pueden incorporarse progresivamente.</p>
+</div>
+<hr>
+<p><a id="modelo-negocio"></a></p>
+<h2 id="14-modelo-de-negocio-y-monetización">14. Modelo de Negocio y Monetización</h2>
+<p>La plataforma tiene potencial de generar ingresos por múltiples vías. A continuación se presentan las estrategias organizadas por viabilidad y momento de implementación.</p>
+<h3 id="141-modelo-freemium-con-suscripción-premium">14.1 Modelo Freemium con Suscripción Premium</h3>
+<p>Este es el <strong>motor principal de ingresos</strong> recomendado. El acceso gratuito atrae volumen de usuarios y la suscripción Premium convierte a los más comprometidos.</p>
+<table>
+<thead>
+<tr>
+<th>Característica</th>
+<th>Gratis</th>
+<th>Premium</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Duelos 1v1 al día</td>
+<td>3</td>
+<td>Ilimitados</td>
+</tr>
+<tr>
+<td>Lenguajes disponibles</td>
+<td>1 (Python)</td>
+<td>Todos los disponibles</td>
+</tr>
+<tr>
+<td>Historial de partidas</td>
+<td>Últimas 5</td>
+<td>Completo + análisis</td>
+</tr>
+<tr>
+<td>Estadísticas de rendimiento</td>
+<td>Básicas (Elo, W/L)</td>
+<td>Avanzadas (tiempo promedio, tasa por dificultad, gráficos de progreso)</td>
+</tr>
+<tr>
+<td>Revisión de código post-partida</td>
+<td>❌</td>
+<td>✅ Ver solución del oponente al finalizar</td>
+</tr>
+<tr>
+<td>Temas del editor</td>
+<td>Predeterminado</td>
+<td>Catálogo completo de temas</td>
+</tr>
+<tr>
+<td>Insignias exclusivas</td>
+<td>❌</td>
+<td>✅ Marco premium en perfil</td>
+</tr>
+<tr>
+<td>Cola de matchmaking</td>
+<td>Estándar</td>
+<td>Prioridad (menor tiempo de espera)</td>
+</tr>
+<tr>
+<td>Acceso anticipado a problemas nuevos</td>
+<td>❌</td>
+<td>✅ 1 semana antes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Precio sugerido:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Precio</th>
+<th>Ahorro</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mensual</td>
+<td>$5.99 USD/mes</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Trimestral</td>
+<td>$14.99 USD/trimestre</td>
+<td>~17%</td>
+</tr>
+<tr>
+<td>Anual</td>
+<td>$49.99 USD/año</td>
+<td>~30%</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-tip"><p class="markdown-alert-title"><svg class="octicon octicon-light-bulb mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p><p>El límite de 3 duelos diarios gratuitos es clave: suficiente para enganchar al usuario, pero genera frustración positiva que impulsa la conversión. Plataformas como <a href="http://Chess.com">Chess.com</a> y Duolingo usan esta misma mecánica.</p>
+</div>
+<h3 id="142-torneos-de-entrada-pagada-post-mvp">14.2 Torneos de Entrada Pagada (Post-MVP)</h3>
+<p>Los torneos competitivos son una fuente de ingresos directa y un generador de engagement masivo.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo de Torneo</th>
+<th>Entrada</th>
+<th>Premio</th>
+<th>Comisión FastCode</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Torneo Diario</strong></td>
+<td>$1 - $2 USD</td>
+<td>Pool distribuido entre Top 3</td>
+<td>15-20% del pool</td>
+</tr>
+<tr>
+<td><strong>Torneo Semanal</strong></td>
+<td>$5 USD</td>
+<td>Pool mayor + insignia exclusiva</td>
+<td>15-20% del pool</td>
+</tr>
+<tr>
+<td><strong>Torneo Patrocinado</strong></td>
+<td>Gratis o $1 USD</td>
+<td>Premios del patrocinador (licencias, hardware, vouchers)</td>
+<td>Patrocinador paga fee fijo</td>
+</tr>
+<tr>
+<td><strong>Torneo Corporativo</strong></td>
+<td>Pagado por empresa</td>
+<td>Reclutamiento/employer branding</td>
+<td>$500-2000 por evento</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Modelo de comisión:</strong></p>
+<pre><code>Pool total = Entradas recaudadas
+Comisión FastCode = Pool × 0.15 a 0.20
+Premio distribuido = Pool - Comisión
+</code></pre>
+<p><strong>Ejemplo concreto:</strong> Torneo semanal con 200 participantes × $5 = $1,000 pool → $150-200 para FastCode, $800-850 en premios.</p>
+<h3 id="143-fastcode-for-teams--b2b-evaluación-técnica-para-empresas">14.3 FastCode for Teams / B2B (Evaluación Técnica para Empresas)</h3>
+<p>Esta es la vía de <strong>mayor margen de ganancia</strong> a mediano plazo. Las empresas de tecnología gastan miles de dólares en herramientas de evaluación técnica (HackerRank, Codility, CodeSignal).</p>
+<h4 id="producto-b2b-fastcode-hiring">Producto B2B: FastCode Hiring</h4>
+<table>
+<thead>
+<tr>
+<th>Funcionalidad</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Salas privadas de evaluación</strong></td>
+<td>La empresa crea duelos controlados entre candidatos</td>
+</tr>
+<tr>
+<td><strong>Banco de problemas corporativo</strong></td>
+<td>Problemas personalizados subidos por la empresa</td>
+</tr>
+<tr>
+<td><strong>Dashboard de resultados</strong></td>
+<td>Rendimiento comparativo de candidatos con métricas detalladas</td>
+</tr>
+<tr>
+<td><strong>Reportes exportables</strong></td>
+<td>PDF/CSV con Elo, tiempo de resolución, calidad de código</td>
+</tr>
+<tr>
+<td><strong>Integración ATS</strong></td>
+<td>Webhook o API para conectar con Greenhouse, Lever, etc.</td>
+</tr>
+<tr>
+<td><strong>Evaluación en vivo</strong></td>
+<td>El reclutador observa el duelo en tiempo real (modo espectador)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pricing B2B:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Plan</th>
+<th>Precio</th>
+<th>Incluye</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Starter</td>
+<td>$199 USD/mes</td>
+<td>50 evaluaciones/mes, 1 sala</td>
+</tr>
+<tr>
+<td>Professional</td>
+<td>$499 USD/mes</td>
+<td>200 evaluaciones/mes, 5 salas, problemas custom</td>
+</tr>
+<tr>
+<td>Enterprise</td>
+<td>$999+ USD/mes</td>
+<td>Ilimitadas, API, integraciones, soporte dedicado</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-important"><p class="markdown-alert-title"><svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p><p>El producto B2B reutiliza el 80% de la infraestructura existente (editor, sandbox, evaluación, Elo). El costo marginal de añadir esta vertical es bajo comparado con el ingreso potencial.</p>
+</div>
+<h3 id="144-marketplace-de-cosmetics-y-personalización">14.4 Marketplace de Cosmetics y Personalización</h3>
+<p>Modelo probado en gaming (Fortnite, League of Legends) aplicado a coding.</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Precio</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Temas del editor</strong></td>
+<td>$1.99 - $3.99</td>
+<td>Temas visuales para Monaco Editor (Cyberpunk, Retro, Dracula Pro, etc.)</td>
+</tr>
+<tr>
+<td><strong>Marcos de perfil</strong></td>
+<td>$0.99 - $2.99</td>
+<td>Bordes animados o temáticos para el avatar</td>
+</tr>
+<tr>
+<td><strong>Títulos</strong></td>
+<td>$0.99</td>
+<td>Títulos debajo del username (&quot;El Veloz&quot;, &quot;Depurador&quot;, &quot;Arquitecto&quot;)</td>
+</tr>
+<tr>
+<td><strong>Efectos de victoria</strong></td>
+<td>$1.99 - $4.99</td>
+<td>Animación especial al ganar un duelo</td>
+</tr>
+<tr>
+<td><strong>Paquetes temáticos</strong></td>
+<td>$7.99 - $14.99</td>
+<td>Bundle de tema + marco + título + efecto</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Moneda virtual (FastCoins):</strong></p>
+<pre><code>100 FastCoins = $0.99 USD
+500 FastCoins = $3.99 USD (20% bonus)
+1200 FastCoins = $7.99 USD (33% bonus)
+</code></pre>
+<p>Los usuarios también pueden ganar FastCoins limitadas jugando (incentivo de retención).</p>
+<h3 id="145-patrocinios-y-partnerships">14.5 Patrocinios y Partnerships</h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Modelo</th>
+<th>Ejemplo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Problema patrocinado</strong></td>
+<td>Una empresa patrocina un problema temático</td>
+<td>&quot;Resuelve el challenge de Spotify: optimiza una playlist&quot;</td>
+</tr>
+<tr>
+<td><strong>Torneo patrocinado</strong></td>
+<td>La marca financia el prize pool</td>
+<td>&quot;Copa GitHub: $500 en premios&quot;</td>
+</tr>
+<tr>
+<td><strong>Branding en arena</strong></td>
+<td>Logo del sponsor visible durante el duelo</td>
+<td>Banner discreto en la interfaz</td>
+</tr>
+<tr>
+<td><strong>Contenido co-creado</strong></td>
+<td>Problemas diseñados con la empresa</td>
+<td>AWS patrocina problemas de cloud computing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Pricing orientativo:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Patrocinio</th>
+<th>Precio estimado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Problema patrocinado (1 mes)</td>
+<td>$500 - $1,500</td>
+</tr>
+<tr>
+<td>Torneo patrocinado</td>
+<td>$1,000 - $5,000</td>
+</tr>
+<tr>
+<td>Branding mensual en arena</td>
+<td>$2,000 - $10,000 (según MAU)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="146-programa-de-afiliados-y-referidos">14.6 Programa de Afiliados y Referidos</h3>
+<table>
+<thead>
+<tr>
+<th>Mecánica</th>
+<th>Recompensa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Referido registra y juega 5 duelos</strong></td>
+<td>Ambos reciben 3 días de Premium gratis</td>
+</tr>
+<tr>
+<td><strong>Referido se suscribe a Premium</strong></td>
+<td>El referidor recibe 15% de comisión del primer mes</td>
+</tr>
+<tr>
+<td><strong>Creador de contenido (YouTube, Twitch)</strong></td>
+<td>Código de descuento 20% + comisión recurrente del 10%</td>
+</tr>
+<tr>
+<td><strong>Influencer de programación</strong></td>
+<td>Acuerdo personalizado + acceso anticipado a features</td>
+</tr>
+</tbody>
+</table>
+<h3 id="147-api-pública-de-evaluación-de-código-post-mvp">14.7 API Pública de Evaluación de Código (Post-MVP)</h3>
+<p>Monetizar la infraestructura del sandbox como servicio independiente.</p>
+<table>
+<thead>
+<tr>
+<th>Plan API</th>
+<th>Precio</th>
+<th>Ejecuciones/mes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Free</td>
+<td>$0</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Developer</td>
+<td>$19/mes</td>
+<td>5,000</td>
+</tr>
+<tr>
+<td>Business</td>
+<td>$79/mes</td>
+<td>25,000</td>
+</tr>
+<tr>
+<td>Scale</td>
+<td>$199/mes</td>
+<td>100,000</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Casos de uso:</strong></p>
+<ul>
+<li>Plataformas educativas que necesitan ejecutar código de estudiantes</li>
+<li>Blogs técnicos con snippets interactivos</li>
+<li>Herramientas internas de empresas para code challenges</li>
+</ul>
+<h3 id="148-contenido-educativo-premium">14.8 Contenido Educativo Premium</h3>
+<table>
+<thead>
+<tr>
+<th>Producto</th>
+<th>Precio</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Rutas de aprendizaje</strong></td>
+<td>$9.99 - $29.99 (único)</td>
+<td>Packs de problemas progresivos por tema (grafos, DP, strings)</td>
+</tr>
+<tr>
+<td><strong>Análisis de soluciones</strong></td>
+<td>Incluido en Premium</td>
+<td>Explicación paso a paso de la solución óptima</td>
+</tr>
+<tr>
+<td><strong>Preparación de entrevistas</strong></td>
+<td>$19.99/mes</td>
+<td>Problemas estilo FAANG con evaluación y feedback</td>
+</tr>
+<tr>
+<td><strong>Certificación FastCode</strong></td>
+<td>$29.99 (único)</td>
+<td>Examen timed que otorga un certificado verificable de nivel</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="estrategia-crecimiento"></a></p>
+<h2 id="15-estrategia-de-crecimiento-y-captación">15. Estrategia de Crecimiento y Captación</h2>
+<h3 id="151-flywheel-de-crecimiento">15.1 Flywheel de Crecimiento</h3>
+<pre class="mermaid" style="all: unset;">graph LR
+    A["Más jugadores"] --&gt; B["Matchmaking más rápido"]
+    B --&gt; C["Mejor experiencia"]
+    C --&gt; D["Mayor retención"]
+    D --&gt; E["Más referidos"]
+    E --&gt; A
+    D --&gt; F["Más conversión a Premium"]
+    F --&gt; G["Más ingresos"]
+    G --&gt; H["Mejor producto"]
+    H --&gt; C</pre>
+<h3 id="152-canales-de-adquisición">15.2 Canales de Adquisición</h3>
+<table>
+<thead>
+<tr>
+<th>Canal</th>
+<th>Estrategia</th>
+<th>Costo estimado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Comunidades dev</strong></td>
+<td>Posts en Reddit (r/learnprogramming, r/cscareerquestions), <a href="http://Dev.to">Dev.to</a>, Hashnode</td>
+<td>Gratis (orgánico)</td>
+</tr>
+<tr>
+<td><strong>YouTube / Twitch</strong></td>
+<td>Creators de programación hacen duelos en vivo</td>
+<td>Producto gratis + comisión de afiliado</td>
+</tr>
+<tr>
+<td><strong>Universidades</strong></td>
+<td>Programa gratuito para clubes de programación y clases de algoritmos</td>
+<td>Gratis (acuerdo institucional)</td>
+</tr>
+<tr>
+<td><strong>Hackathons</strong></td>
+<td>Presencia como sponsor o herramienta complementaria</td>
+<td>$200-500 por evento</td>
+</tr>
+<tr>
+<td><strong>SEO</strong></td>
+<td>Blog con soluciones de problemas, tutoriales de algoritmos</td>
+<td>Tiempo de creación de contenido</td>
+</tr>
+<tr>
+<td><strong>Product Hunt</strong></td>
+<td>Lanzamiento en Product Hunt para visibilidad inicial</td>
+<td>Gratis</td>
+</tr>
+<tr>
+<td><strong>Twitter/X tech</strong></td>
+<td>Threads de problemas interesantes, highlights de duelos épicos</td>
+<td>Gratis (orgánico)</td>
+</tr>
+<tr>
+<td><strong>Discord</strong></td>
+<td>Servidor propio con comunidad, rankings, eventos semanales</td>
+<td>Gratis</td>
+</tr>
+</tbody>
+</table>
+<h3 id="153-retención-y-engagement">15.3 Retención y Engagement</h3>
+<table>
+<thead>
+<tr>
+<th>Mecánica</th>
+<th>Descripción</th>
+<th>Impacto esperado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Racha diaria</strong></td>
+<td>Bonus de FastCoins por jugar N días consecutivos</td>
+<td>+25% retención D7</td>
+</tr>
+<tr>
+<td><strong>Liga semanal</strong></td>
+<td>Bronce → Plata → Oro → Diamante según partidas jugadas esa semana</td>
+<td>+30% partidas/semana</td>
+</tr>
+<tr>
+<td><strong>Desafío del día</strong></td>
+<td>Un problema destacado diario con leaderboard</td>
+<td>Tráfico recurrente diario</td>
+</tr>
+<tr>
+<td><strong>Temporadas</strong></td>
+<td>Ciclos de 3 meses con reset parcial de liga y recompensas exclusivas</td>
+<td>Reengagement trimestral</td>
+</tr>
+<tr>
+<td><strong>Logros</strong></td>
+<td>&quot;Primera victoria&quot;, &quot;10 rachas&quot;, &quot;Elo 1500&quot; con badges compartibles</td>
+<td>Motivación a largo plazo</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a id="proyeccion-financiera"></a></p>
+<h2 id="16-proyección-financiera-del-mvp">16. Proyección Financiera del MVP</h2>
+<h3 id="161-supuestos-base">16.1 Supuestos Base</h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuarios registrados (6 meses post-lanzamiento)</td>
+<td>5,000</td>
+</tr>
+<tr>
+<td>Usuarios activos mensuales (MAU)</td>
+<td>1,500 (30%)</td>
+</tr>
+<tr>
+<td>Tasa de conversión a Premium</td>
+<td>5% de MAU</td>
+</tr>
+<tr>
+<td>Precio promedio de suscripción</td>
+<td>$5.50 USD/mes</td>
+</tr>
+<tr>
+<td>Compra promedio de cosmetics (usuarios que compran)</td>
+<td>$3.00 USD/mes</td>
+</tr>
+<tr>
+<td>% de MAU que compra cosmetics</td>
+<td>3%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="162-proyección-mensual-mes-6">16.2 Proyección Mensual (Mes 6)</h3>
+<table>
+<thead>
+<tr>
+<th>Fuente de Ingreso</th>
+<th>Cálculo</th>
+<th style="text-align:right">Ingreso Mensual</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Suscripciones Premium</strong></td>
+<td>75 suscriptores × $5.50</td>
+<td style="text-align:right">$412.50</td>
+</tr>
+<tr>
+<td><strong>Cosmetics</strong></td>
+<td>45 compradores × $3.00</td>
+<td style="text-align:right">$135.00</td>
+</tr>
+<tr>
+<td><strong>Torneos</strong> (si se implementa)</td>
+<td>2 torneos × $100 comisión</td>
+<td style="text-align:right">$200.00</td>
+</tr>
+<tr>
+<td><strong>Total estimado mes 6</strong></td>
+<td></td>
+<td style="text-align:right"><strong>$747.50</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="163-proyección-de-escalamiento-mes-12-24">16.3 Proyección de Escalamiento (Mes 12-24)</h3>
+<table>
+<thead>
+<tr>
+<th>Escenario</th>
+<th>MAU</th>
+<th>Premium (5%)</th>
+<th>Suscripciones</th>
+<th>Cosmetics</th>
+<th>Torneos</th>
+<th>B2B</th>
+<th><strong>Total/mes</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Conservador (mes 12)</strong></td>
+<td>5,000</td>
+<td>250</td>
+<td>$1,375</td>
+<td>$450</td>
+<td>$400</td>
+<td>$0</td>
+<td><strong>$2,225</strong></td>
+</tr>
+<tr>
+<td><strong>Moderado (mes 18)</strong></td>
+<td>15,000</td>
+<td>750</td>
+<td>$4,125</td>
+<td>$1,350</td>
+<td>$1,200</td>
+<td>$499</td>
+<td><strong>$7,174</strong></td>
+</tr>
+<tr>
+<td><strong>Optimista (mes 24)</strong></td>
+<td>50,000</td>
+<td>2,500</td>
+<td>$13,750</td>
+<td>$4,500</td>
+<td>$4,000</td>
+<td>$2,997</td>
+<td><strong>$25,247</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="164-costos-operativos-estimados">16.4 Costos Operativos Estimados</h3>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>MVP (mes 1-6)</th>
+<th>Escalado (mes 12+)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Servidor / VPS</td>
+<td>$30 - $50/mes</td>
+<td>$100 - $300/mes</td>
+</tr>
+<tr>
+<td>Dominio + TLS</td>
+<td>$15/año</td>
+<td>$15/año</td>
+</tr>
+<tr>
+<td>Servicios terceros (email, analytics)</td>
+<td>$0 - $20/mes</td>
+<td>$50 - $100/mes</td>
+</tr>
+<tr>
+<td>Pasarela de pagos (Stripe: 2.9% + $0.30)</td>
+<td>Variable</td>
+<td>Variable</td>
+</tr>
+<tr>
+<td><strong>Total costos fijos</strong></td>
+<td><strong>~$50 - $70/mes</strong></td>
+<td><strong>~$150 - $400/mes</strong></td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-note"><p class="markdown-alert-title"><svg class="octicon octicon-info mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p><p>Con el escenario conservador del mes 12, FastCode ya podría cubrir sus costos operativos y generar un margen. El punto de equilibrio estimado se alcanza con ~100 suscriptores Premium activos (~$550/mes de ingresos por suscripciones vs ~$70/mes de costos).</p>
+</div>
+<h3 id="165-punto-de-equilibrio">16.5 Punto de Equilibrio</h3>
+<pre class="mermaid" style="all: unset;">graph LR
+    A["~100 suscriptores Premium"] --&gt; B["$550/mes en suscripciones"]
+    B --&gt; C["Cubre costos de ~$70/mes del MVP"]
+    C --&gt; D["Breakeven alcanzado"]
+    D --&gt; E["Cada suscriptor adicional = margen puro (~$5.50)"]</pre>
+<hr>
+<p><a id="roadmap-monetizacion"></a></p>
+<h2 id="17-roadmap-de-monetización-por-fases">17. Roadmap de Monetización por Fases</h2>
+<h3 id="fase-0--mvp-gratuito-meses-1-3">Fase 0 — MVP Gratuito (Meses 1-3)</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lanzar la plataforma 100% gratuita</td>
+<td>Validar la hipótesis del producto</td>
+</tr>
+<tr>
+<td>Sin límites de duelos</td>
+<td>Maximizar engagement y datos</td>
+</tr>
+<tr>
+<td>Medir retención D1, D7, D30</td>
+<td>Establecer línea base</td>
+</tr>
+<tr>
+<td>Medir partidas completadas vs abandonadas</td>
+<td>Validar experiencia de juego</td>
+</tr>
+<tr>
+<td>Recoger feedback cualitativo</td>
+<td>Entender qué valoran los usuarios</td>
+</tr>
+<tr>
+<td>Construir comunidad en Discord</td>
+<td>Base de early adopters</td>
+</tr>
+</tbody>
+</table>
+<div class="markdown-alert markdown-alert-important"><p class="markdown-alert-title"><svg class="octicon octicon-report mr-2" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path d="M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Important</p><p>No monetizar durante esta fase. El objetivo es puramente validar que los usuarios disfrutan la experiencia y vuelven a jugar. Monetizar demasiado pronto mata el crecimiento.</p>
+</div>
+<h3 id="fase-1--introducción-de-premium-meses-3-6">Fase 1 — Introducción de Premium (Meses 3-6)</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Introducir el límite de 3 duelos/día para usuarios gratuitos</td>
+<td>Crear fricción positiva</td>
+</tr>
+<tr>
+<td>Lanzar suscripción Premium (mensual y anual)</td>
+<td>Primera fuente de ingresos</td>
+</tr>
+<tr>
+<td>Ofrecer 7 días de trial Premium a todos los usuarios existentes</td>
+<td>Convertir early adopters</td>
+</tr>
+<tr>
+<td>Implementar estadísticas avanzadas exclusivas para Premium</td>
+<td>Justificar el valor</td>
+</tr>
+<tr>
+<td>Integrar pasarela de pagos (Stripe)</td>
+<td>Infraestructura de cobro</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fase-2--cosmetics-y-engagement-meses-6-9">Fase 2 — Cosmetics y Engagement (Meses 6-9)</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lanzar tienda de temas de editor y marcos de perfil</td>
+<td>Segunda fuente de ingresos</td>
+</tr>
+<tr>
+<td>Introducir FastCoins (ganables + comprables)</td>
+<td>Moneda virtual del ecosistema</td>
+</tr>
+<tr>
+<td>Implementar sistema de rachas y ligas semanales</td>
+<td>Aumentar retención</td>
+</tr>
+<tr>
+<td>Lanzar programa de referidos</td>
+<td>Crecimiento orgánico</td>
+</tr>
+<tr>
+<td>Abrir primer torneo gratuito</td>
+<td>Testear formato competitivo</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fase-3--torneos-y-b2b-meses-9-15">Fase 3 — Torneos y B2B (Meses 9-15)</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Lanzar torneos de entrada pagada</td>
+<td>Tercera fuente de ingresos</td>
+</tr>
+<tr>
+<td>Desarrollar MVP de FastCode Hiring (B2B)</td>
+<td>Fuente de alto margen</td>
+</tr>
+<tr>
+<td>Buscar primeros patrocinadores de problemas/torneos</td>
+<td>Ingresos por partnerships</td>
+</tr>
+<tr>
+<td>Implementar API pública de ejecución (beta)</td>
+<td>Cuarta fuente de ingresos</td>
+</tr>
+<tr>
+<td>Lanzar temporadas competitivas</td>
+<td>Reengagement cíclico</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fase-4--escalamiento-meses-15">Fase 4 — Escalamiento (Meses 15+)</h3>
+<table>
+<thead>
+<tr>
+<th>Acción</th>
+<th>Objetivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Expandir producto B2B con integraciones ATS</td>
+<td>Escalar ingreso corporativo</td>
+</tr>
+<tr>
+<td>Lanzar contenido educativo premium y certificaciones</td>
+<td>Quinta fuente de ingresos</td>
+</tr>
+<tr>
+<td>Soportar múltiples lenguajes (JavaScript, Java, C++)</td>
+<td>Ampliar mercado total</td>
+</tr>
+<tr>
+<td>Buscar inversión o revenue-based financing si los unit economics lo justifican</td>
+<td>Acelerar crecimiento</td>
+</tr>
+<tr>
+<td>Internacionalización (español, inglés, portugués)</td>
+<td>Nuevos mercados</td>
+</tr>
+</tbody>
+</table>
+<h3 id="resumen-visual-del-roadmap">Resumen Visual del Roadmap</h3>
+<pre class="mermaid" style="all: unset;">gantt
+    title Roadmap de Monetización FastCode
+    dateFormat  YYYY-MM
+    axisFormat  %b %Y
+
+    section Fase 0 - Validación
+    MVP gratuito + métricas            :f0, 2026-09, 3M
+    Comunidad Discord                  :f0b, 2026-09, 3M
+
+    section Fase 1 - Premium
+    Límite freemium + suscripción      :f1, 2026-12, 3M
+    Pasarela de pagos (Stripe)         :f1b, 2026-12, 1M
+
+    section Fase 2 - Cosmetics
+    Tienda + FastCoins                 :f2, 2027-03, 3M
+    Rachas y ligas                     :f2b, 2027-03, 2M
+    Programa de referidos              :f2c, 2027-04, 2M
+
+    section Fase 3 - Torneos y B2B
+    Torneos pagados                    :f3, 2027-06, 3M
+    FastCode Hiring (B2B)              :f3b, 2027-06, 4M
+    Patrocinios                        :f3c, 2027-07, 3M
+
+    section Fase 4 - Escala
+    Múltiples lenguajes                :f4, 2027-10, 4M
+    Contenido educativo premium        :f4b, 2027-10, 3M
+    Internacionalización               :f4c, 2028-01, 3M</pre>
+<hr>
+<div class="callout callout-caution">
+    <span class="callout-icon">⚠️</span>
+    <div class="callout-content">
+        <div class="callout-title">Nota sobre proyecciones financieras</div>
+        <p style="margin: 0;">Las proyecciones financieras son estimaciones basadas en benchmarks de la industria (tasas de conversión del 3-7% para productos freemium, ~2-5% de compra de cosmetics). Los números reales dependerán de la calidad del producto, la ejecución del go-to-market y las condiciones del mercado. Se recomienda revisar estas proyecciones mensualmente con datos reales una vez lanzado el MVP.</p>
+    </div>
+</div>
+        </main>
+    </div>
+</body>
+</html>

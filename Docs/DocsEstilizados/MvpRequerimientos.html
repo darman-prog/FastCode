@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRD — FastCode MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border-color: #334155;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            }
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        
+        .content { padding: 2rem; }
+        
+        h2 {
+            font-size: 1.5rem; font-weight: 700; color: var(--text-primary);
+            margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        h2:first-child { margin-top: 0; }
+        
+        h3 { font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin: 1.5rem 0 0.75rem; }
+        h4 { font-size: 1.1rem; font-weight: 600; color: var(--text-secondary); margin: 1.25rem 0 0.5rem; }
+        
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        strong { color: var(--text-primary); font-weight: 600; }
+        
+        /* States Tags */
+        .states { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+        .state-tag { padding: 0.375rem 0.75rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 500; }
+        .state-loading { background: #dbeafe; color: #1d4ed8; }
+        .state-error { background: #fee2e2; color: #dc2626; }
+        .state-empty { background: #f3f4f6; color: #4b5563; }
+        .state-disabled { background: #f3f4f6; color: #6b7280; }
+        .state-success { background: #d1fae5; color: #059669; }
+        
+        @media (prefers-color-scheme: dark) {
+            .state-loading { background: #1e3a5f; color: #93c5fd; }
+            .state-error { background: #4c1d1d; color: #fca5a5; }
+            .state-empty { background: #374151; color: #d1d5db; }
+            .state-disabled { background: #374151; color: #9ca3af; }
+            .state-success { background: #14532d; color: #86efac; }
+        }
+        
+        /* Lists */
+        ul, ol { margin: 1rem 0; padding-left: 1.5rem; }
+        li { margin-bottom: 0.5rem; color: var(--text-secondary); }
+        li::marker { color: var(--accent-primary); }
+        
+        /* Tables */
+        table {
+            width: 100%; border-collapse: separate; border-spacing: 0;
+            margin: 1.5rem 0; border-radius: var(--radius-md);
+            overflow: hidden; box-shadow: var(--shadow-sm);
+        }
+        thead { background: var(--bg-tertiary); }
+        th { padding: 0.875rem 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.05em; }
+        td { padding: 0.875rem 1rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); }
+        tbody tr:hover { background: var(--bg-secondary); }
+        
+        /* Callouts */
+        .callout { padding: 1rem 1.25rem; border-radius: var(--radius-md); margin: 1.5rem 0; display: flex; gap: 0.75rem; align-items: flex-start; }
+        .callout-icon { font-size: 1.25rem; flex-shrink: 0; }
+        .callout-content { flex: 1; }
+        .callout-title { font-weight: 600; margin-bottom: 0.25rem; }
+        
+        .callout-note { background: #eff6ff; border-left: 4px solid var(--accent-primary); }
+        .callout-note .callout-title { color: var(--accent-primary); }
+        .callout-important { background: #faf5ff; border-left: 4px solid var(--accent-secondary); }
+        .callout-important .callout-title { color: var(--accent-secondary); }
+        .callout-warning { background: #fffbeb; border-left: 4px solid var(--warning); }
+        .callout-warning .callout-title { color: var(--warning); }
+        .callout-tip { background: #ecfdf5; border-left: 4px solid var(--success); }
+        .callout-tip .callout-title { color: var(--success); }
+        .callout-caution { background: #fef2f2; border-left: 4px solid var(--error); }
+        .callout-caution .callout-title { color: var(--error); }
+        
+        @media (prefers-color-scheme: dark) {
+            .callout-note { background: #1e3a5f; }
+            .callout-important { background: #2e1065; }
+            .callout-warning { background: #451a03; }
+            .callout-tip { background: #064e3b; }
+            .callout-caution { background: #450a0a; }
+        }
+        
+        /* Rules */
+        .rules-grid { display: grid; gap: 0.75rem; margin: 1rem 0; }
+        .rule-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-sm); }
+        .rule-number { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; background: var(--accent-primary); color: white; border-radius: 50%; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+        
+        /* Code */
+        code { font-family: var(--font-mono); background: var(--bg-tertiary); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.875em; color: var(--accent-secondary); }
+        pre { background: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; margin: 1rem 0; }
+        pre code { background: none; padding: 0; color: var(--text-primary); }
+        
+        /* Divider */
+        hr { border: none; height: 1px; background: var(--border-color); margin: 2rem 0; }
+        
+        /* Checklist */
+        .checklist { list-style: none; padding: 0; }
+        .checklist-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--radius-sm); margin-bottom: 0.5rem; }
+        .checkbox { width: 20px; height: 20px; border: 2px solid var(--border-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .checkbox.checked { background: var(--success); border-color: var(--success); color: white; }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .container { border-radius: 0; }
+            .content { padding: 1.5rem 1rem; }
+            .header { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📋 PRD — FastCode MVP</h1>
+            <span class="header-badge">Product Requirements Document v2.0</span>
+        </header>
+        <main class="content">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Versión:</strong> 2.0</span>
+                <span style="background: var(--bg-tertiary); padding: 0.5rem 1rem; border-radius: var(--radius-sm); font-size: 0.875rem;"><strong>Estado:</strong> Borrador funcional revisado</span>
+            </div>
+            
+            <p><strong>Alcance del documento:</strong> Producto, reglas de negocio y criterios de aceptación.</p>
+            
+            <div class="callout callout-note">
+                <span class="callout-icon">📝</span>
+                <div class="callout-content">
+                    <div class="callout-title">Fuera de esta versión</div>
+                    <p style="margin: 0;">Lenguajes de programación, frameworks, proveedores, arquitectura, infraestructura, persistencia, protocolos de comunicación y contratos técnicos. Estas decisiones se documentarán en una versión técnica posterior.</p>
+                </div>
+            </div>
+<h2 id="índice-de-contenidos">Índice de Contenidos</h2>
+<ol>
+<li><a href="#section-1">Resumen Ejecutivo</a></li>
+<li><a href="#section-2">Objetivo y Principios del MVP</a></li>
+<li><a href="#section-3">Alcance Priorizado</a></li>
+<li><a href="#section-4">Flujos Principales</a></li>
+<li><a href="#section-5">Requisitos Funcionales</a></li>
+<li><a href="#section-6">Requisitos No Funcionales</a></li>
+<li><a href="#section-7">Métricas de Éxito del MVP</a></li>
+<li><a href="#section-8">Riesgos, Supuestos y Mitigaciones</a></li>
+<li><a href="#section-9">Definición de Done del MVP</a></li>
+<li><a href="#section-10">Versión Técnica Posterior</a></li>
+</ol>
+<h2 id="índice-de-requisitos">Índice de Requisitos</h2>
+<table>
+<thead>
+<tr>
+<th>Código</th>
+<th>Bloque</th>
+<th>Prioridad</th>
+<th>Navegación</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RF1</td>
+<td>Gestión de Usuarios y Perfiles</td>
+<td>Debe</td>
+<td><a href="#rf1">Ir a RF1</a></td>
+</tr>
+<tr>
+<td>RF2</td>
+<td>Banco de Problemas y Variantes Dinámicas</td>
+<td>Debe</td>
+<td><a href="#rf2">Ir a RF2</a></td>
+</tr>
+<tr>
+<td>RF3</td>
+<td>Matchmaking y Emparejamiento</td>
+<td>Debe</td>
+<td><a href="#rf3">Ir a RF3</a></td>
+</tr>
+<tr>
+<td>RF4</td>
+<td>Arena de Duelo 1v1</td>
+<td>Debe</td>
+<td><a href="#rf4">Ir a RF4</a></td>
+</tr>
+<tr>
+<td>RF5</td>
+<td>Resultado, Victoria y Elo</td>
+<td>Debe</td>
+<td><a href="#rf5">Ir a RF5</a></td>
+</tr>
+<tr>
+<td>RF6</td>
+<td>Telemetría y Evidencia de Integridad</td>
+<td>Debe</td>
+<td><a href="#rf6">Ir a RF6</a></td>
+</tr>
+<tr>
+<td>RNF1</td>
+<td>Rendimiento y capacidad</td>
+<td>Debe</td>
+<td><a href="#rnf1">Ir a RNF1</a></td>
+</tr>
+<tr>
+<td>RNF2</td>
+<td>Seguridad y aislamiento</td>
+<td>Debe</td>
+<td><a href="#rnf2">Ir a RNF2</a></td>
+</tr>
+<tr>
+<td>RNF3</td>
+<td>Disponibilidad y reconexión</td>
+<td>Debe</td>
+<td><a href="#rnf3">Ir a RNF3</a></td>
+</tr>
+<tr>
+<td>RNF4</td>
+<td>Experiencia y accesibilidad</td>
+<td>Debe</td>
+<td><a href="#rnf4">Ir a RNF4</a></td>
+</tr>
+<tr>
+<td>RNF5</td>
+<td>Auditoría y privacidad</td>
+<td>Debe</td>
+<td><a href="#rnf5">Ir a RNF5</a></td>
+</tr>
+</tbody>
+</table>
+<p><a id="section-1"></a></p>
+<h2 id="1-resumen-ejecutivo">1. Resumen Ejecutivo</h2>
+<p><strong>FastCode</strong> es una plataforma de programación competitiva 1v1 en tiempo real. Dos usuarios reciben el mismo problema con una variante dinámica, compiten durante un tiempo limitado y obtienen un resultado oficial basado en la evaluación de sus soluciones.</p>
+<p>El MVP debe validar estas hipótesis:</p>
+<ol>
+<li>Los usuarios encuentran valor en resolver problemas de programación contra un oponente real.</li>
+<li>La variante dinámica del enunciado dificulta el uso de respuestas pre-generadas o copiadas textualmente sin alterar la dificultad del problema.</li>
+<li>Un resultado calculado de forma oficial y transparente genera una experiencia competitiva confiable.</li>
+</ol>
+<p>El MVP prioriza el flujo completo de un duelo sobre las funciones sociales, la variedad de autenticación y las herramientas avanzadas de moderación.</p>
+<p><a id="section-2"></a></p>
+<h2 id="2-objetivo-y-principios-del-mvp">2. Objetivo y Principios del MVP</h2>
+<h3 id="21-objetivo">2.1 Objetivo</h3>
+<p>Permitir que dos usuarios autenticados entren en una cola, sean emparejados, resuelvan un problema dinámico en una arena 1v1, reciban un resultado determinista y actualicen su puntuación Elo.</p>
+<h3 id="22-principios">2.2 Principios</h3>
+<ul>
+<li>El estado oficial de la partida y el resultado no dependen de decisiones tomadas únicamente por el cliente.</li>
+<li>La variante dinámica debe conservar la lógica, dificultad, entradas, salidas y casos de prueba del problema original.</li>
+<li>Las reglas de victoria deben ser conocidas, medibles y reproducibles.</li>
+<li>Las señales de integridad son evidencia contextual, no una garantía absoluta contra trampas.</li>
+<li>El documento describe qué debe hacer el producto, no cómo se implementará.</li>
+</ul>
+<p><a id="section-3"></a></p>
+<h2 id="3-alcance-priorizado">3. Alcance Priorizado</h2>
+<h3 id="31-debe-incluir-el-mvp">3.1 Debe incluir el MVP</h3>
+<ul>
+<li>Registro e inicio de sesión mediante correo y contraseña.</li>
+<li>Perfil mínimo con nombre de usuario y puntuación Elo.</li>
+<li>Banco inicial de al menos 3 problemas, con al menos 1 problema por cada dificultad: Fácil, Medio y Difícil.</li>
+<li>Enunciados dinámicos obligatorios en las partidas.</li>
+<li>Cola de emparejamiento entre usuarios reales.</li>
+<li>Duelo 1v1 con periodo de gracia, tiempo límite y finalización oficial.</li>
+<li>Editor de código integrado para el lenguaje que se defina en la versión técnica.</li>
+<li>Evaluación oficial de los casos ocultos fuera del control del cliente.</li>
+<li>Dashboard que recopile la informacion de partidas del usuario y informacion general</li>
+<li>Resolución del ganador según reglas jerárquicas de completitud, progreso y errores.</li>
+<li>Actualización del Elo después de una partida válida.</li>
+<li>Reconexión durante una ventana de 15 segundos.</li>
+<li>Telemetría de integridad, clasificación de evidencias y sanciones definidas en RF6.</li>
+</ul>
+<h3 id="32-debería-incluirse-después-del-núcleo-del-mvp">3.2 Debería incluirse después del núcleo del MVP</h3>
+<ul>
+<li>Historial detallado de los últimos 10 duelos.</li>
+<li>Insignias Oro, Plata y Bronce.</li>
+<li>Avatar y personalización ampliada del perfil.</li>
+<li>Alertas sonoras discretas, siempre acompañadas de una alternativa visual.</li>
+<li>Optimización de envíos repetidos mediante caché.</li>
+<li>Herramientas de consulta y revisión de evidencias de integridad.</li>
+</ul>
+<h3 id="33-fuera-del-mvp">3.3 Fuera del MVP</h3>
+<ul>
+<li>Inicio de sesión mediante OAuth, incluyendo GitHub y Google.</li>
+<li>Oponente bot después del timeout de búsqueda.</li>
+<li>Torneos, equipos, salas privadas y temporadas competitivas.</li>
+<li>Sistema social, chat y mensajería entre usuarios.</li>
+<li>Anti-trampas basado únicamente en bloqueos del portapapeles o del foco.</li>
+<li>Selección definitiva de lenguaje, stack, arquitectura, proveedores y estrategia de despliegue.</li>
+</ul>
+<p><a id="section-4"></a></p>
+<h2 id="4-flujos-principales">4. Flujos Principales</h2>
+<h3 id="41-registro-y-entrada">4.1 Registro y entrada</h3>
+<ol>
+<li>El usuario crea una cuenta con correo, contraseña y nombre de usuario.</li>
+<li>El sistema valida los datos y evita duplicidades.</li>
+<li>El usuario inicia sesión y consulta su Elo.</li>
+<li>El usuario puede entrar en la cola de búsqueda.</li>
+</ol>
+<h3 id="42-emparejamiento">4.2 Emparejamiento</h3>
+<ol>
+<li>El usuario solicita un duelo.</li>
+<li>El sistema muestra el estado de búsqueda y el tiempo transcurrido.</li>
+<li>El sistema busca un oponente compatible según las ventanas de Elo definidas en RF3.</li>
+<li>Al encontrarlo, ambos usuarios reciben la confirmación del emparejamiento.</li>
+<li>Si no hay oponente a los 40 segundos, la búsqueda termina y se ofrecen las opciones de reintentar o cancelar.</li>
+</ol>
+<h3 id="43-duelo">4.3 Duelo</h3>
+<ol>
+<li>Ambos usuarios reciben el mismo problema dinámico.</li>
+<li>Durante 15 segundos pueden leer la consigna, pero no pueden realizar envíos oficiales.</li>
+<li>Comienza el tiempo activo y ambos pueden editar y enviar su solución.</li>
+<li>El sistema informa del progreso oficial del oponente.</li>
+<li>La partida finaliza por completitud, timeout, desconexión o sanción de integridad.</li>
+</ol>
+<h3 id="44-resultado">4.4 Resultado</h3>
+<ol>
+<li>El sistema calcula el resultado usando únicamente evaluaciones oficiales.</li>
+<li>Se muestra el ganador, el motivo, el progreso de ambos y el cambio de Elo.</li>
+<li>Las evidencias de integridad quedan asociadas a la partida para una posible revisión.</li>
+</ol>
+<p><a id="section-5"></a></p>
+<h2 id="5-requisitos-funcionales">5. Requisitos Funcionales</h2>
+<p><a id="rf1"></a></p>
+<h3 id="rf1-gestión-de-usuarios-y-perfiles">RF1. Gestión de Usuarios y Perfiles</h3>
+<h4 id="rf11-autenticación-por-correo-y-contraseña-debe">RF1.1 Autenticación por correo y contraseña [Debe]</h4>
+<p>El sistema debe permitir registrar cuentas e iniciar sesión mediante correo y contraseña. OAuth no forma parte del MVP.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Un registro válido crea una cuenta con un nombre de usuario único.</li>
+<li>Un correo o nombre de usuario ya registrado produce un error comprensible y no crea una segunda cuenta.</li>
+<li>Las credenciales inválidas no revelan si una cuenta concreta existe.</li>
+<li>Solo un usuario autenticado puede entrar en la cola o participar en una partida.</li>
+<li>El usuario puede cerrar su sesión.</li>
+</ul>
+<h4 id="rf12-puntuación-inicial-debe">RF1.2 Puntuación inicial [Debe]</h4>
+<p>Todo usuario nuevo comienza con un Elo de 1200 puntos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El Elo inicial se muestra antes de la primera partida.</li>
+<li>Una partida cancelada antes de comenzar no modifica el Elo.</li>
+<li>El cambio posterior se calcula según RF5.3.</li>
+</ul>
+<h4 id="rf13-perfil-mínimo-debe">RF1.3 Perfil mínimo [Debe]</h4>
+<p>El perfil muestra el nombre de usuario y el Elo actual.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El propietario puede consultar su propio perfil.</li>
+<li>Un usuario puede consultar la información pública mínima de otro usuario.</li>
+<li>El perfil no expone correo, credenciales ni evidencias privadas de integridad.</li>
+</ul>
+<h4 id="rf14-historial-e-insignias-debería">RF1.4 Historial e insignias [Debería]</h4>
+<p>El perfil podrá mostrar los últimos 10 duelos y el contador de insignias Oro, Plata y Bronce cuando estas funciones se incorporen al MVP extendido.</p>
+<p><a id="rf2"></a></p>
+<h3 id="rf2-banco-de-problemas-y-variantes-dinámicas">RF2. Banco de Problemas y Variantes Dinámicas</h3>
+<h4 id="rf21-catálogo-y-dificultad-debe">RF2.1 Catálogo y dificultad [Debe]</h4>
+<p>El catálogo inicial debe contener al menos 3 problemas publicados: 1 Fácil, 1 Medio y 1 Difícil. Cada problema debe tener una dificultad, una descripción, restricciones, formato de entrada, formato de salida y límite de tiempo.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Un problema no puede publicarse sin todos los datos obligatorios.</li>
+<li>La dificultad visible debe coincidir con la clasificación del catálogo.</li>
+<li>La asignación de una partida selecciona un único problema y la misma dificultad para ambos jugadores.</li>
+</ul>
+<h4 id="rf22-casos-de-prueba-debe">RF2.2 Casos de prueba [Debe]</h4>
+<p>Cada problema debe incluir al menos 2 casos públicos y entre 3 y 5 casos ocultos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Los casos públicos pueden consultarse antes o durante la partida.</li>
+<li>Los casos ocultos no se muestran al cliente ni al oponente.</li>
+<li>El resultado oficial se basa en los casos ocultos.</li>
+<li>Un error de evaluación del servicio de ejecución no se cuenta como un envío fallido del usuario.</li>
+</ul>
+<h4 id="rf23-enunciado-dinámico-por-partida-debe">RF2.3 Enunciado dinámico por partida [Debe]</h4>
+<p>Cada partida debe utilizar una variante dinámica del problema asignado. Como mínimo, la variante debe parametrizar los nombres de variables y funciones a partir de un conjunto de nombres válidos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Los dos jugadores reciben exactamente la misma variante del problema.</li>
+<li>La variante conserva la lógica, restricciones, entradas, salidas, dificultad y límite de tiempo del problema base.</li>
+<li>Los casos públicos y ocultos corresponden a la variante entregada.</li>
+<li>Una misma plantilla puede generar más de una variante válida.</li>
+<li>La generación de una variante inválida impide iniciar la partida y muestra un error controlado.</li>
+<li>La variante dinámica reduce la utilidad de soluciones copiadas textualmente, pero no se presenta como una garantía absoluta contra trampas.</li>
+</ul>
+<h4 id="rf24-tiempo-límite-debe">RF2.4 Tiempo límite [Debe]</h4>
+<p>Cada problema debe definir un timeout absoluto para la partida.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El timeout se muestra a ambos jugadores antes de comenzar la fase activa.</li>
+<li>El timeout es igual para ambos jugadores.</li>
+<li>Una vez agotado el tiempo no se aceptan nuevos envíos oficiales.</li>
+</ul>
+<h4 id="rf25-insignias-debería">RF2.5 Insignias [Debería]</h4>
+<p>Cada problema podrá definir umbrales de tiempo para asignar insignias Oro, Plata y Bronce. Esta función no bloquea la validación del duelo principal.</p>
+<p><a id="rf3"></a></p>
+<h3 id="rf3-matchmaking-y-emparejamiento">RF3. Matchmaking y Emparejamiento</h3>
+<h4 id="rf31-cola-de-espera-debe">RF3.1 Cola de espera [Debe]</h4>
+<p>El usuario puede entrar y salir de una cola de búsqueda de duelos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El usuario ve que está en cola y el tiempo transcurrido.</li>
+<li>Un usuario no puede tener más de una solicitud activa de búsqueda.</li>
+<li>La cancelación antes del emparejamiento no genera resultado ni modifica el Elo.</li>
+<li>Una partida confirmada no puede asignarse simultáneamente a un tercer usuario.</li>
+</ul>
+<h4 id="rf32-rango-de-búsqueda-debe">RF3.2 Rango de búsqueda [Debe]</h4>
+<p>La búsqueda utiliza estas ventanas acumulativas:</p>
+<table>
+<thead>
+<tr>
+<th>Tiempo transcurrido</th>
+<th style="text-align:right">Diferencia máxima de Elo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 a 15 segundos</td>
+<td style="text-align:right">±100</td>
+</tr>
+<tr>
+<td>Más de 15 a 25 segundos</td>
+<td style="text-align:right">±150</td>
+</tr>
+<tr>
+<td>Más de 25 a 35 segundos</td>
+<td style="text-align:right">±200</td>
+</tr>
+<tr>
+<td>Más de 35 a 40 segundos</td>
+<td style="text-align:right">±250</td>
+</tr>
+</tbody>
+</table>
+<p>Dos usuarios son compatibles cuando la diferencia de Elo se encuentra dentro del rango activo de búsqueda para ambos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El rango se amplía según la tabla y no antes de tiempo.</li>
+<li>El sistema no empareja usuarios fuera del rango activo de ambos.</li>
+<li>El usuario recibe confirmación antes de entrar en la partida.</li>
+</ul>
+<h4 id="rf33-timeout-sin-bot-debe">RF3.3 Timeout sin bot [Debe]</h4>
+<p>Después de 40 segundos sin un oponente compatible, la búsqueda termina. El sistema ofrece reintentar o cancelar, pero no ofrece un bot.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>La búsqueda nunca inicia una partida contra un oponente automático.</li>
+<li>El usuario recibe una explicación clara de que no se encontró rival.</li>
+<li>Reintentar crea una nueva búsqueda sin conservar una solicitud anterior.</li>
+</ul>
+<p><a id="rf4"></a></p>
+<h3 id="rf4-arena-de-duelo-1v1">RF4. Arena de Duelo 1v1</h3>
+<h4 id="rf41-ciclo-de-vida-oficial-debe">RF4.1 Ciclo de vida oficial [Debe]</h4>
+<p>La partida debe seguir este ciclo:</p>
+<p><code>EN_COLA -&gt; EMPAREJAMIENTO_ENCONTRADO -&gt; PERIODO_DE_GRACIA -&gt; PARTIDA_ACTIVA -&gt; FINALIZADA</code></p>
+<p>También puede finalizar como cancelada antes de comenzar, por desconexión o por sanción de integridad.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Una partida no puede pasar directamente de la cola a la fase activa.</li>
+<li>Solo una partida finalizada puede producir resultado y actualizar Elo.</li>
+<li>Una vez finalizada, la partida no acepta nuevos envíos ni cambios de resultado desde el cliente.</li>
+</ul>
+<h4 id="rf42-periodo-de-gracia-debe">RF4.2 Periodo de gracia [Debe]</h4>
+<p>Los primeros 15 segundos permiten leer la consigna. Durante este periodo el editor puede mostrar la plantilla, pero no permite envíos oficiales y el cronómetro de resolución permanece pausado.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Ambos jugadores reciben el mismo periodo de gracia.</li>
+<li>El tiempo restante se muestra de forma visible.</li>
+<li>El primer envío oficial solo puede realizarse cuando comienza la fase activa.</li>
+</ul>
+<h4 id="rf43-editor-integrado-debe">RF4.3 Editor integrado [Debe]</h4>
+<p>La arena debe ofrecer un editor para escribir, modificar y enviar la solución en el lenguaje que se defina en la versión técnica posterior. Este PRD no fija un lenguaje concreto.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El usuario puede escribir y editar una solución durante la fase activa.</li>
+<li>El usuario puede enviar una solución y consultar su estado.</li>
+<li>Los resultados locales o preliminares nunca sustituyen al resultado oficial.</li>
+<li>El código de un jugador no se muestra al oponente.</li>
+<li>Los errores de entrada, ejecución o evaluación se presentan con mensajes comprensibles.</li>
+</ul>
+<h4 id="rf44-envíos-y-progreso-debe">RF4.4 Envíos y progreso [Debe]</h4>
+<p>Cada envío oficial queda asociado al jugador, a la partida y a un instante. El sistema muestra al oponente el progreso agregado de casos aprobados, sin mostrar el código ni los casos ocultos.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Un envío recibido antes del timeout se procesa según las reglas de la partida.</li>
+<li>Un envío recibido después del timeout se rechaza.</li>
+<li>El progreso se actualiza solo con resultados oficiales.</li>
+<li>Un envío que no supera todos los casos ocultos cuenta como envío fallido para RF5.</li>
+<li>Los fallos del evaluador no incrementan los envíos fallidos del usuario.</li>
+</ul>
+<h4 id="rf45-progreso-visual-en-vivo-debe">RF4.5 Progreso visual en vivo [Debe]</h4>
+<p>El progreso del oponente debe comunicarse visualmente.</p>
+<h4 id="rf46-alertas-de-actividad-debería">RF4.6 Alertas de actividad [Debería]</h4>
+<p>La arena podrá mostrar una alerta visual cuando el oponente realice un envío oficial. Las alertas sonoras son opcionales y nunca pueden ser el único medio de notificación.</p>
+<p><a id="rf5"></a></p>
+<h3 id="rf5-resultado-victoria-y-elo">RF5. Resultado, Victoria y Elo</h3>
+<h4 id="rf51-jerarquía-de-resolución-debe">RF5.1 Jerarquía de resolución [Debe]</h4>
+<p>El resultado se determina en este orden:</p>
+<ol>
+<li><strong>Completitud:</strong> gana el primer jugador que valide el 100% de los casos ocultos.</li>
+<li><strong>Progreso parcial:</strong> si termina el tiempo sin completitud, gana quien tenga el mayor porcentaje de casos ocultos superados.</li>
+<li><strong>Envíos fallidos:</strong> si el porcentaje es igual, gana quien tenga menor cantidad de envíos fallidos.</li>
+<li><strong>Empate técnico:</strong> si el progreso y los envíos fallidos son iguales, la partida termina en empate.</li>
+</ol>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>La misma entrada produce siempre el mismo resultado oficial.</li>
+<li>El sistema muestra el motivo exacto de la resolución.</li>
+<li>Una partida no puede tener dos ganadores.</li>
+<li>En un empate técnico no hay variación de Elo.</li>
+</ul>
+<h4 id="rf52-reglas-de-conteo-debe">RF5.2 Reglas de conteo [Debe]</h4>
+<ul>
+<li>Un caso aprobado cuenta una sola vez para el progreso, aunque el usuario reenvíe la misma solución.</li>
+<li>Un envío fallido es un envío oficial que no valida todos los casos ocultos.</li>
+<li>Los borradores, las ejecuciones locales y los errores del evaluador no cuentan como envíos fallidos.</li>
+</ul>
+<h4 id="rf53-actualización-del-elo-debe">RF5.3 Actualización del Elo [Debe]</h4>
+<p>Todo usuario comienza con 1200 puntos y el MVP utilizará inicialmente un <code>K-factor</code> de 32.</p>
+<p>Para una victoria o derrota se aplicará:</p>
+<p><code>Elo nuevo = Elo actual + K x (S - E)</code></p>
+<p>Donde <code>S</code> vale 1 para una victoria y 0 para una derrota, y <code>E</code> representa la expectativa calculada a partir del Elo de ambos jugadores. El resultado se redondea a un número entero. El empate técnico es una excepción: no modifica el Elo de ninguno de los jugadores.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>El ganador recibe el resultado de victoria y el perdedor el de derrota.</li>
+<li>El Elo se actualiza una sola vez por partida.</li>
+<li>Las partidas canceladas antes de comenzar no actualizan el Elo.</li>
+<li>Una sanción grave de integridad o una desconexión que finalice la partida se considera derrota para el usuario sancionado o desconectado.</li>
+</ul>
+<h4 id="rf54-resultado-visible-debe">RF5.4 Resultado visible [Debe]</h4>
+<p>Al finalizar, cada jugador puede consultar ganador, motivo de finalización, progreso de ambos, envíos fallidos y variación de Elo. Los detalles sensibles de las evidencias de integridad no se muestran al oponente.</p>
+<p><a id="rf6"></a></p>
+<h3 id="rf6-telemetría-y-evidencia-de-integridad">RF6. Telemetría y Evidencia de Integridad</h3>
+<h4 id="rf61-principio-de-funcionamiento-debe">RF6.1 Principio de funcionamiento [Debe]</h4>
+<p>El módulo de integridad recopila telemetría y evidencia contextual. No se considera una garantía absoluta contra trampas y no debe depender de un bloqueo del cliente como única defensa.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>Los intentos de pegar contenido, las pérdidas de foco y los patrones de inserción rápida pueden registrarse como eventos.</li>
+<li>Un evento generado en el cliente no modifica por sí solo el resultado oficial.</li>
+<li>La decisión de sanción se aplica según una política definida y registrada para la partida.</li>
+<li>El usuario recibe una notificación cuando una evidencia produce una advertencia o una derrota automática.</li>
+</ul>
+<h4 id="rf62-niveles-de-evidencia-debe">RF6.2 Niveles de evidencia [Debe]</h4>
+<table>
+<thead>
+<tr>
+<th>Nivel</th>
+<th>Ejemplos</th>
+<th>Acción inicial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Leve</td>
+<td>Intento de <code>paste</code>, pérdida de foco menor a 2 segundos o inserción rápida inferior a 300 ms</td>
+<td>Registrar evidencia; sin derrota automática</td>
+</tr>
+<tr>
+<td>Moderado</td>
+<td>Pérdida de foco superior a 2 segundos o repetición de señales leves</td>
+<td>Registrar evidencia y mostrar advertencia</td>
+</tr>
+<tr>
+<td>Grave</td>
+<td>Manipulación del estado oficial, alteración de un envío o acumulación de 3 infracciones moderadas de foco en la misma partida</td>
+<td>Derrota automática por integridad</td>
+</tr>
+</tbody>
+</table>
+<p>Una sola señal leve o moderada no debe provocar una derrota automática. Una evidencia grave validada o la acumulación definida en la tabla sí puede finalizar la partida automáticamente.</p>
+<h4 id="rf63-registro-de-evidencia-debe">RF6.3 Registro de evidencia [Debe]</h4>
+<p>Cada evento debe asociarse a la partida y al jugador, e incluir tipo, nivel, instante, duración cuando aplique y acción tomada.</p>
+<p><strong>Criterios de aceptación:</strong></p>
+<ul>
+<li>La evidencia no almacena contraseñas, tokens ni código completo salvo que una política posterior lo autorice expresamente.</li>
+<li>El oponente no puede consultar los detalles privados de la evidencia.</li>
+<li>El resultado indica de forma general si terminó por integridad y quién recibió la sanción.</li>
+<li>Si ambos jugadores acumulan evidencia grave, la partida se marca para revisión y no modifica el Elo hasta resolverla.</li>
+</ul>
+<p><a id="section-6"></a></p>
+<h2 id="6-requisitos-no-funcionales">6. Requisitos No Funcionales</h2>
+<p><a id="rnf1"></a></p>
+<h3 id="rnf1-rendimiento-y-capacidad">RNF1. Rendimiento y capacidad</h3>
+<ul>
+<li><strong>RNF1.1 Tiempo real:</strong> Los eventos de estado y progreso deben alcanzar una latencia p95 inferior a 150 ms bajo la capacidad objetivo.</li>
+<li><strong>RNF1.2 Evaluación:</strong> El 95% de los envíos oficiales debe devolver un resultado o estado controlado en menos de 5 segundos, excluyendo problemas externos documentados.</li>
+<li><strong>RNF1.3 Capacidad:</strong> El producto debe soportar 100 partidas simultáneas, equivalentes a 200 participantes, sin pérdida de estado ni degradación que impida jugar.</li>
+<li><strong>RNF1.4 Límites:</strong> La ejecución debe controlar tiempo máximo, memoria máxima, tamaño de código y tamaño de salida. Los valores concretos de recursos se fijarán en la versión técnica según el lenguaje seleccionado.</li>
+</ul>
+<p><a id="rnf2"></a></p>
+<h3 id="rnf2-seguridad-y-aislamiento">RNF2. Seguridad y aislamiento</h3>
+<ul>
+<li><strong>RNF2.1 Ejecución aislada:</strong> El código enviado no debe tener acceso a datos de otros usuarios ni a la red externa.</li>
+<li><strong>RNF2.2 Resultado oficial:</strong> Los casos ocultos y el cálculo del resultado no pueden depender de información manipulable desde el cliente.</li>
+<li><strong>RNF2.3 Validación:</strong> Toda entrada, envío y transición sensible debe validarse y autorizarse fuera del cliente.</li>
+<li><strong>RNF2.4 Abuso:</strong> Debe existir limitación de frecuencia para autenticación, entradas a la cola y envíos oficiales.</li>
+<li><strong>RNF2.5 Sesiones:</strong> Las sesiones deben protegerse con mecanismos seguros y no deben exponer credenciales en respuestas, mensajes o registros.</li>
+<li><strong>RNF2.6 Acceso por objeto:</strong> Un usuario solo puede consultar y modificar su propio perfil y sus acciones dentro de partidas en las que participa.</li>
+</ul>
+<p><a id="rnf3"></a></p>
+<h3 id="rnf3-disponibilidad-y-reconexión">RNF3. Disponibilidad y reconexión</h3>
+<ul>
+<li><strong>RNF3.1 Reconexión:</strong> Ante una pérdida abrupta de conexión, el usuario dispone de 15 segundos para volver a la partida.</li>
+<li><strong>RNF3.2 Estado durante la desconexión:</strong> El oponente ve un indicador de desconexión y el tiempo oficial continúa según las reglas de la partida.</li>
+<li><strong>RNF3.3 Derrota por desconexión:</strong> Si no hay reconexión dentro de la ventana, la partida finaliza con derrota por desconexión, salvo que ya exista un resultado oficial anterior.</li>
+<li><strong>RNF3.4 Recuperación:</strong> Al reconectarse, el usuario recibe el estado actual, el tiempo restante y su progreso sincronizado.</li>
+</ul>
+<p><a id="rnf4"></a></p>
+<h3 id="rnf4-experiencia-y-accesibilidad">RNF4. Experiencia y accesibilidad</h3>
+<ul>
+<li><strong>RNF4.1 Estados de interfaz:</strong> Cola, arena y resultado deben contemplar estados de carga, error, vacío, deshabilitado y éxito cuando correspondan.</li>
+<li><strong>RNF4.2 Responsive:</strong> Los flujos principales deben funcionar en pantallas pequeñas y grandes.</li>
+<li><strong>RNF4.3 Accesibilidad:</strong> La experiencia debe orientarse a WCAG 2.1 AA, incluyendo contraste suficiente, foco visible, navegación por teclado, etiquetas y mensajes claros.</li>
+<li><strong>RNF4.4 Feedback:</strong> El usuario debe conocer siempre el estado de la partida, el tiempo restante, el resultado de un envío y el motivo de finalización.</li>
+</ul>
+<p><a id="rnf5"></a></p>
+<h3 id="rnf5-auditoría-y-privacidad">RNF5. Auditoría y privacidad</h3>
+<ul>
+<li><strong>RNF5.1 Trazabilidad:</strong> Las acciones críticas deben conservar partida, usuario, instante, tipo de acción y resultado.</li>
+<li><strong>RNF5.2 Minimización:</strong> La telemetría debe recoger únicamente los datos necesarios para resolver disputas y mejorar la integridad.</li>
+<li><strong>RNF5.3 Retención:</strong> El periodo de conservación de evidencias debe definirse en la política de privacidad antes del lanzamiento y no superar el tiempo necesario para su finalidad.</li>
+<li><strong>RNF5.4 Transparencia:</strong> El usuario debe conocer que se recopilan señales de foco, portapapeles e interacción durante un duelo.</li>
+</ul>
+<p><a id="section-7"></a></p>
+<h2 id="7-métricas-de-éxito-del-mvp">7. Métricas de Éxito del MVP</h2>
+<p>Los siguientes valores son objetivos iniciales y deben revisarse después del primer piloto:</p>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Objetivo inicial</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tiempo mediano de emparejamiento</td>
+<td>Menor de 20 segundos</td>
+</tr>
+<tr>
+<td>Partidas emparejadas dentro de 40 segundos</td>
+<td>Al menos 70% de las búsquedas</td>
+</tr>
+<tr>
+<td>Partidas completadas sin abandono</td>
+<td>Al menos 60%</td>
+</tr>
+<tr>
+<td>Latencia p95 de eventos de partida</td>
+<td>Menor de 150 ms</td>
+</tr>
+<tr>
+<td>Envíos con resultado o estado controlado en menos de 5 segundos</td>
+<td>Al menos 95%</td>
+</tr>
+<tr>
+<td>Partidas con error del evaluador</td>
+<td>Menos del 5%</td>
+</tr>
+<tr>
+<td>Partidas con disputa de integridad</td>
+<td>Menos del 5%</td>
+</tr>
+<tr>
+<td>Usuarios que vuelven a jugar dentro de 7 días</td>
+<td>Medir durante el piloto y establecer línea base</td>
+</tr>
+</tbody>
+</table>
+<p>La hipótesis de los enunciados dinámicos debe evaluarse comparando la tasa de finalización, abandono y reportes de integridad frente a una línea base definida en pruebas internas.</p>
+<p><a id="section-8"></a></p>
+<h2 id="8-riesgos-supuestos-y-mitigaciones">8. Riesgos, Supuestos y Mitigaciones</h2>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Elemento</th>
+<th>Mitigación o decisión requerida</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Riesgo</td>
+<td>Las variantes dinámicas pueden alterar accidentalmente la dificultad o romper una solución válida</td>
+<td>Validar cada variante contra casos públicos y ocultos antes de habilitarla</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>La telemetría puede generar falsos positivos y disputas</td>
+<td>No sancionar por una señal aislada, mostrar el motivo y conservar evidencia contextual</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>Sin bot puede haber tiempos de espera altos en el lanzamiento</td>
+<td>Mostrar el tiempo, permitir reintentar y medir la tasa de emparejamiento</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>La ejecución de código puede consumir recursos o intentar acceder a información externa</td>
+<td>Aplicar aislamiento y límites antes de habilitar el lenguaje elegido</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>La evaluación puede fallar o quedar pendiente</td>
+<td>Diferenciar error del evaluador de error del usuario y definir reintentos controlados</td>
+</tr>
+<tr>
+<td>Riesgo</td>
+<td>La recopilación de telemetría puede afectar privacidad</td>
+<td>Publicar finalidad, datos recogidos, retención y acceso antes del lanzamiento</td>
+</tr>
+<tr>
+<td>Supuesto</td>
+<td>Existirá un catálogo inicial con problemas revisados y variantes válidas</td>
+<td>Crear un proceso de revisión de contenido antes de publicar cada problema</td>
+</tr>
+<tr>
+<td>Supuesto</td>
+<td>El lenguaje y el stack se decidirán en una versión técnica posterior</td>
+<td>No bloquear este PRD con nombres de tecnologías o proveedores</td>
+</tr>
+<tr>
+<td>Supuesto</td>
+<td>El piloto tendrá suficiente concurrencia para medir matchmaking y rendimiento</td>
+<td>Instrumentar las métricas desde el primer entorno de validación</td>
+</tr>
+</tbody>
+</table>
+<p><a id="section-9"></a></p>
+<h2 id="9-definición-de-done-del-mvp">9. Definición de Done del MVP</h2>
+<p>El MVP se considera listo cuando se cumplen todas estas condiciones:</p>
+<ul>
+<li>Un usuario puede registrarse, iniciar sesión y consultar su Elo.</li>
+<li>Dos usuarios reales pueden entrar en cola y emparejarse dentro de las reglas definidas.</li>
+<li>La búsqueda termina a los 40 segundos sin ofrecer un bot.</li>
+<li>Ambos jugadores reciben la misma variante dinámica válida del problema.</li>
+<li>El periodo de gracia dura 15 segundos y la fase activa respeta el timeout.</li>
+<li>El lenguaje seleccionado en la versión técnica permite editar, enviar y evaluar soluciones oficialmente.</li>
+<li>Los casos ocultos no quedan expuestos al cliente.</li>
+<li>El ganador se determina de forma reproducible según RF5.</li>
+<li>Los empates técnicos no modifican el Elo.</li>
+<li>Las derrotas por desconexión e integridad se aplican según las reglas documentadas.</li>
+<li>La reconexión funciona durante 15 segundos y sincroniza el estado de la partida.</li>
+<li>La telemetría registra evidencias sin almacenar secretos ni código completo innecesario.</li>
+<li>Los flujos principales contemplan errores, estados de carga y accesibilidad básica.</li>
+<li>Se han validado los objetivos de capacidad, evaluación y latencia con el entorno definido en la versión técnica.</li>
+<li>Las métricas de éxito pueden consultarse durante el piloto.</li>
+</ul>
+<p><a id="section-10"></a></p>
+<h2 id="10-versión-técnica-posterior">10. Versión Técnica Posterior</h2>
+<p>Una versión posterior debe definir, sin modificar las reglas funcionales de este PRD salvo decisión explícita:</p>
+<ul>
+<li>Lenguaje o lenguajes soportados y sus versiones.</li>
+<li>Stack de frontend, backend y servicios auxiliares.</li>
+<li>Arquitectura, persistencia, despliegue y observabilidad.</li>
+<li>Contratos de comunicación, eventos y manejo de errores.</li>
+<li>Estrategia de evaluación y aislamiento de código.</li>
+<li>Límites concretos de CPU, memoria, tiempo, código y salida.</li>
+<li>Política técnica de generación y validación de variantes dinámicas.</li>
+<li>Política de autenticación, sesiones y recuperación de cuentas.</li>
+</ul>
+
+        </main>
+    </div>
+</body>
+</html>

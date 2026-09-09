@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diseño Stitch — FastCode MVP</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --info: #06b6d4;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #0f172a;
+                --bg-secondary: #1e293b;
+                --bg-tertiary: #334155;
+                --text-primary: #f1f5f9;
+                --text-secondary: #cbd5e1;
+                --text-tertiary: #94a3b8;
+                --border-color: #334155;
+                --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+                --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+                --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            font-size: 15px;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+            padding: 2rem 1rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 2.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-primary);
+        }
+        
+        h2:first-child {
+            margin-top: 0;
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.75rem;
+        }
+        
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin: 1.25rem 0 0.5rem;
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        /* Screen Cards */
+        .screen-card {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--accent-primary);
+        }
+        
+        .screen-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+        
+        .screen-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .objective {
+            background: var(--bg-tertiary);
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+        }
+        
+        .objective-label {
+            font-weight: 600;
+            color: var(--accent-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .flow {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-sm);
+            margin-top: 1rem;
+            font-weight: 500;
+        }
+        
+        .flow-arrow {
+            font-size: 1.25rem;
+        }
+        
+        /* States */
+        .states {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .state-tag {
+            padding: 0.375rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .state-loading { background: #dbeafe; color: #1d4ed8; }
+        .state-error { background: #fee2e2; color: #dc2626; }
+        .state-empty { background: #f3f4f6; color: #4b5563; }
+        .state-disabled { background: #f3f4f6; color: #6b7280; }
+        .state-success { background: #d1fae5; color: #059669; }
+        
+        @media (prefers-color-scheme: dark) {
+            .state-loading { background: #1e3a5f; color: #93c5fd; }
+            .state-error { background: #4c1d1d; color: #fca5a5; }
+            .state-empty { background: #374151; color: #d1d5db; }
+            .state-disabled { background: #374151; color: #9ca3af; }
+            .state-success { background: #14532d; color: #86efac; }
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        
+        li::marker {
+            color: var(--accent-primary);
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 1.5rem 0;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        thead {
+            background: var(--bg-tertiary);
+        }
+        
+        th {
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        td {
+            padding: 0.875rem 1rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+        
+        tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+        
+        /* Callouts */
+        .callout {
+            padding: 1rem 1.25rem;
+            border-radius: var(--radius-md);
+            margin: 1.5rem 0;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+        
+        .callout-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .callout-content {
+            flex: 1;
+        }
+        
+        .callout-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .callout-note {
+            background: #eff6ff;
+            border-left: 4px solid var(--accent-primary);
+        }
+        .callout-note .callout-title { color: var(--accent-primary); }
+        
+        .callout-important {
+            background: #faf5ff;
+            border-left: 4px solid var(--accent-secondary);
+        }
+        .callout-important .callout-title { color: var(--accent-secondary); }
+        
+        .callout-warning {
+            background: #fffbeb;
+            border-left: 4px solid var(--warning);
+        }
+        .callout-warning .callout-title { color: var(--warning); }
+        
+        .callout-tip {
+            background: #ecfdf5;
+            border-left: 4px solid var(--success);
+        }
+        .callout-tip .callout-title { color: var(--success); }
+        
+        .callout-caution {
+            background: #fef2f2;
+            border-left: 4px solid var(--error);
+        }
+        .callout-caution .callout-title { color: var(--error); }
+        
+        @media (prefers-color-scheme: dark) {
+            .callout-note { background: #1e3a5f; }
+            .callout-important { background: #2e1065; }
+            .callout-warning { background: #451a03; }
+            .callout-tip { background: #064e3b; }
+            .callout-caution { background: #450a0a; }
+        }
+        
+        /* Rules */
+        .rules-grid {
+            display: grid;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+        }
+        
+        .rule-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 24px;
+            height: 24px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.75rem;
+            flex-shrink: 0;
+        }
+        
+        /* Code */
+        code {
+            font-family: var(--font-mono);
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.875em;
+            color: var(--accent-secondary);
+        }
+        
+        pre {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+        }
+        
+        /* Divider */
+        hr {
+            border: none;
+            height: 1px;
+            background: var(--border-color);
+            margin: 2rem 0;
+        }
+        
+        /* Checklist */
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+        }
+        
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        
+        /* Success Criteria */
+        .success-criteria {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .success-criteria h3 {
+            color: #065f46;
+            margin-top: 0;
+        }
+        
+        .success-criteria p {
+            color: #047857;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .success-criteria {
+                background: linear-gradient(135deg, #064e3b, #065f46);
+            }
+            .success-criteria h3 { color: #86efac; }
+            .success-criteria p { color: #6ee7b7; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 640px) {
+            body { padding: 0; }
+            .container { border-radius: 0; }
+            .content { padding: 1.5rem 1rem; }
+            .header { padding: 2rem 1rem; }
+            .header h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🎨 Diseño Stitch — FastCode MVP</h1>
+            <span class="header-badge">Wireframes & Reglas de Negocio</span>
+        </header>
+        <main class="content">
+            <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem;">Actúa como diseñador UI senior mobile-first. Genera wireframes de baja fidelidad (blanco/negro) para las 5 pantallas descritas abajo. Cada pantalla debe tener versión <strong>mobile 375px</strong> y <strong>desktop 1280px</strong> cuando el layout lo requiera. Prioriza claridad del estado del juego sobre decoración. Cumple WCAG 2.1 AA y los estados obligatorios.</p>
+
+<h2>Reglas de negocio que no puedes romper</h2>
+<div class="rules-grid">
+    <div class="rule-item">
+        <span class="rule-number">1</span>
+        <span>Elo inicial 1200, K=32, empate técnico = 0 cambio de Elo.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">2</span>
+        <span>Matchmaking: ventanas acumulativas ±100 (0-15s) → ±150 (15-25s) → ±200 (25-35s) → ±250 (35-40s). Compatible solo si ambos dentro. Timeout 40s sin bot.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">3</span>
+        <span>Ciclo oficial: EN_COLA → EMPAREJAMIENTO_ENCONTRADO → PERIODO_DE_GRACIA (15s sin envíos) → PARTIDA_ACTIVA → FINALIZADA.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">4</span>
+        <span>Variante dinámica idéntica para ambos (solo cambian nombres de vars/funcs). Casos ocultos 3-5 nunca se muestran al cliente.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">5</span>
+        <span>Telemetría: 1 señal leve/moderada aislada no derrota; 3 moderadas de foco o 1 grave = derrota automática.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">6</span>
+        <span>El estado oficial y el resultado vienen solo del servidor. La UI solo refleja.</span>
+    </div>
+</div>
+
+<h2>Reglas transversales para todas las pantallas</h2>
+<div class="rules-grid">
+    <div class="rule-item">
+        <span class="rule-number">1</span>
+        <span><strong>Mobile-first.</strong> Diseña primero en 375px, luego escala.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">2</span>
+        <span><strong>Estados visuales obligatorios:</strong></span>
+        <span class="states" style="margin-top: 0.5rem;">
+            <span class="state-tag state-loading">loading</span>
+            <span class="state-tag state-error">error</span>
+            <span class="state-tag state-empty">empty</span>
+            <span class="state-tag state-disabled">disabled</span>
+            <span class="state-tag state-success">success</span>
+        </span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">3</span>
+        <span><strong>Accesibilidad:</strong> contraste 4.5:1 texto / 3:1 UI grande, foco visible, todo operable con teclado, labels explícitos, objetivo táctil ≥44px, nunca usar solo color para informar.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">4</span>
+        <span><strong>Timers</strong> con <code>role="timer"</code> y anuncio de cambios críticos.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">5</span>
+        <span><strong>Nunca mostrar</strong> código del oponente ni casos ocultos. <strong>Nunca decidir</strong> el resultado en el cliente.</span>
+    </div>
+</div>
+<hr>
+
+<!-- PANTALLA 1 -->
+<div class="screen-card">
+    <div class="screen-title">
+        <span class="screen-number">1</span>
+        Autenticación
+    </div>
+    <div class="objective">
+        <span class="objective-label">Objetivo</span>
+        <p style="margin: 0.25rem 0 0;">Registro e inicio de sesión con correo y contraseña.</p>
+    </div>
+    <h4>Debe contener</h4>
+    <ul>
+        <li>Formulario con campos de correo, contraseña y nombre de usuario (registro) o solo correo y contraseña (login).</li>
+        <li>Control para alternar entre registro y login.</li>
+        <li>Mensajes de error específicos y comprensibles sin revelar si un correo existe.</li>
+        <li>Estado de carga en el botón al enviar.</li>
+    </ul>
+    <div class="flow">
+        <span>Flujo:</span>
+        <span class="flow-arrow">→</span>
+        <span>Éxito → Pantalla 2 (Perfil)</span>
+    </div>
+    <h4>Qué entregar</h4>
+    <p>Wireframe mobile y desktop de ambas variantes (registro y login).</p>
+    <div class="states">
+        <span class="state-tag state-loading">loading</span>
+        <span class="state-tag state-error">error</span>
+        <span class="state-tag state-disabled">idle</span>
+    </div>
+</div>
+
+<!-- PANTALLA 2 -->
+<div class="screen-card">
+    <div class="screen-title">
+        <span class="screen-number">2</span>
+        Perfil (mínimo)
+    </div>
+    <div class="objective">
+        <span class="objective-label">Objetivo</span>
+        <p style="margin: 0.25rem 0 0;">Mostrar perfil mínimo del usuario autenticado.</p>
+    </div>
+    <h4>Debe contener</h4>
+    <ul>
+        <li>Avatar genérico o con iniciales (sin personalización ampliada).</li>
+        <li>Nombre de usuario.</li>
+        <li>Puntuación Elo actual destacada.</li>
+        <li>Acción para cerrar sesión.</li>
+    </ul>
+    <div class="callout callout-warning">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-content">
+            <div class="callout-title">No incluir</div>
+            <p style="margin: 0;">Historial de partidas, estadísticas avanzadas, edición de nombre/foto, insignias. Eso es post-MVP.</p>
+        </div>
+    </div>
+    <div class="flow">
+        <span>Flujo:</span>
+        <span class="flow-arrow">→</span>
+        <span>"Buscar duelo" → Pantalla 3</span>
+    </div>
+    <h4>Qué entregar</h4>
+    <p>Wireframe mobile y desktop.</p>
+    <div class="states">
+        <span class="state-tag state-loading">loading</span>
+        <span class="state-tag state-disabled">idle</span>
+    </div>
+</div>
+
+<!-- PANTALLA 3 -->
+<div class="screen-card">
+    <div class="screen-title">
+        <span class="screen-number">3</span>
+        Cola de Matchmaking
+    </div>
+    <div class="objective">
+        <span class="objective-label">Objetivo</span>
+        <p style="margin: 0.25rem 0 0;">Buscar oponente real.</p>
+    </div>
+    <h4>Debe contener siempre</h4>
+    <ul>
+        <li>Cronómetro de búsqueda que inicia en 00:00 y cuenta hacia arriba.</li>
+        <li>Indicador del rango Elo activo actual (ej. "Rango: ±100" y se actualiza según tiempo).</li>
+        <li>Barra de progreso sutil de la ventana actual.</li>
+        <li>Botón para cancelar la búsqueda.</li>
+    </ul>
+    <h4>Estados a generar</h4>
+    <div class="rules-grid">
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--success);">●</span>
+            <span><strong>Buscando:</strong> cronómetro corriendo, rango visible, botón cancelar habilitado.</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--warning);">●</span>
+            <span><strong>Timeout a los 40s:</strong> cronómetro detenido en 00:40, mensaje "No se encontró oponente" con botones "Reintentar" y "Cancelar".</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--error);">●</span>
+            <span><strong>Error de conexión:</strong> banner de error con acción para reintentar.</span>
+        </div>
+    </div>
+    <div class="flow">
+        <span>Flujo:</span>
+        <span class="flow-arrow">→</span>
+        <span>Al encontrar oponente → Pantalla 4</span>
+    </div>
+    <h4>Qué entregar</h4>
+    <p>Wireframe mobile y desktop con 3 variantes de estado. Mostrar cómo cambia el indicador de rango:</p>
+    <div class="states">
+        <span class="state-tag state-disabled">0-15s: ±100</span>
+        <span class="state-tag state-disabled">15-25s: ±150</span>
+        <span class="state-tag state-disabled">25-35s: ±200</span>
+        <span class="state-tag state-warning">35-40s: ±250</span>
+    </div>
+</div>
+
+<!-- PANTALLA 4 -->
+<div class="screen-card" style="border-left-color: var(--accent-secondary);">
+    <div class="screen-title">
+        <span class="screen-number" style="background: var(--accent-secondary);">4</span>
+        Arena de Duelo
+    </div>
+    <div class="objective">
+        <span class="objective-label">Objetivo</span>
+        <p style="margin: 0.25rem 0 0;">Duelo 1v1 en tiempo real. Es una sola pantalla que cambia de contenido según la fase.</p>
+    </div>
+    <div class="callout callout-important">
+        <span class="callout-icon">🏗️</span>
+        <div class="callout-content">
+            <div class="callout-title">Layout</div>
+            <ul style="margin: 0.5rem 0 0;">
+                <li><strong>Mobile:</strong> contenido apilado vertical.</li>
+                <li><strong>Desktop:</strong> dos columnas 50/50 con separación de 24px.</li>
+                <li><strong>Encabezado fijo:</strong> cronómetro oficial + chip de fase actual.</li>
+            </ul>
+        </div>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-sm);">
+            <h4>Columna Izquierda (Tú)</h4>
+            <ul>
+                <li>Avatar y nombre de usuario</li>
+                <li>Badge con Elo actual</li>
+                <li>Enunciado del problema dinámico</li>
+                <li>Editor de código (mín. 6 líneas visibles)</li>
+                <li>Botón para enviar solución</li>
+                <li>Mensaje de estado debajo del botón</li>
+            </ul>
+        </div>
+        <div style="background: var(--bg-secondary); padding: 1rem; border-radius: var(--radius-sm);">
+            <h4>Columna Derecha (Oponente)</h4>
+            <ul>
+                <li>Avatar y nombre de usuario</li>
+                <li>Badge con Elo actual</li>
+                <li><strong>Indicador abstracto del progreso</strong> (barra, puntos o círculo)</li>
+            </ul>
+            <div class="callout callout-caution" style="margin-top: 0.75rem;">
+                <span class="callout-icon">🚫</span>
+                <div class="callout-content">
+                    <p style="margin: 0; font-size: 0.875rem;">Nunca mostrar código, casos ni porcentaje exacto por caso.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h4>Fases a generar como variantes</h4>
+    <div class="rules-grid">
+        <div class="rule-item">
+            <span class="rule-number">1</span>
+            <span><strong>Periodo de gracia (15s):</strong> chip "Periodo de gracia", contador visible, botón de enviar deshabilitado con explicación, editor habilitado para escribir.</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number">2</span>
+            <span><strong>Partida activa:</strong> chip "Partida activa", botón habilitado "Enviar solución", al enviar muestra estado de evaluación. Últimos 60s: cronómetro cambia visualmente.</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number">3</span>
+            <span><strong>Desconexión:</strong> banner de reconexión activo, progreso congelado, señal visual de desconexión en el avatar.</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number">4</span>
+            <span><strong>Reconexión exitosa:</strong> banner cambia a "Reconectado" y desaparece, estado del juego sincronizado sin recargar.</span>
+        </div>
+    </div>
+    <div class="flow">
+        <span>Flujo:</span>
+        <span class="flow-arrow">→</span>
+        <span>Al finalizar → Pantalla 5</span>
+    </div>
+    <h4>Qué entregar</h4>
+    <p>Wireframe mobile y desktop con 4 variantes.</p>
+    <div class="states">
+        <span class="state-tag state-disabled">Gracia</span>
+        <span class="state-tag state-success">Activa</span>
+        <span class="state-tag state-error">Desconexión</span>
+        <span class="state-tag state-loading">Reconexión</span>
+    </div>
+</div>
+
+<!-- PANTALLA 5 -->
+<div class="screen-card" style="border-left-color: var(--success);">
+    <div class="screen-title">
+        <span class="screen-number" style="background: var(--success);">5</span>
+        Resultado
+    </div>
+    <div class="objective">
+        <span class="objective-label">Objetivo</span>
+        <p style="margin: 0.25rem 0 0;">Mostrar resultado oficial y estadísticas.</p>
+    </div>
+    <h4>Debe contener</h4>
+    <ul>
+        <li>Encabezado "Duelo finalizado" con ícono según motivo.</li>
+        <li>Dos tarjetas de jugador (lado a lado en desktop, apiladas en mobile). Cada tarjeta con avatar, nombre, Elo antes → después con cambio (+32 / -32 / 0 en empate), progreso en casos (ej. "3/5 casos") y cantidad de envíos fallidos.</li>
+        <li>Tarjeta de motivo de finalización a ancho completo con mensaje específico.</li>
+        <li>Acciones centradas: "Volver a jugar" como acción principal, "Ver perfil oponente" y "Ir al inicio" como secundarias.</li>
+    </ul>
+    <h4>Motivos a generar como variantes</h4>
+    <div class="rules-grid">
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--success);">🏆</span>
+            <span><strong>Completitud:</strong> gana el primero en resolver 100% de casos. "¡Ganaste por resolver todos los casos primero!"</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--info);">📊</span>
+            <span><strong>Progreso parcial:</strong> al agotarse el tiempo gana quien tiene mayor porcentaje. "Ganaste por resolver más casos en el tiempo límite".</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--text-tertiary);">🤝</span>
+            <span><strong>Empate técnico:</strong> mismo progreso y mismos envíos fallidos. "Empate técnico" y cambio de Elo 0.</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--error);">📡</span>
+            <span><strong>Desconexión:</strong> sin reconexión en 15s. "Derrota por desconexión".</span>
+        </div>
+        <div class="rule-item">
+            <span class="rule-number" style="background: var(--warning);">⚠️</span>
+            <span><strong>Integridad:</strong> derrota por evidencia grave. "Derrota por integridad". Nunca mostrar detalles privados al oponente.</span>
+        </div>
+    </div>
+    <div class="flow">
+        <span>Flujo:</span>
+        <span class="flow-arrow">→</span>
+        <span>"Volver a jugar" → Pantalla 3</span>
+    </div>
+    <h4>Qué entregar</h4>
+    <p>Wireframe mobile y desktop con 5 variantes, una por cada motivo.</p>
+</div>
+<hr>
+<h2>Qué debe entregar la IA</h2>
+<div class="rules-grid">
+    <div class="rule-item">
+        <span class="rule-number">1</span>
+        <span>Wireframes de baja fidelidad en blanco y negro para las 5 pantallas en 375px y 1280px.</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">2</span>
+        <span>Para Pantalla 4: 4 variantes (gracia, activa, desconexión, reconexión).</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">3</span>
+        <span>Para Pantalla 5: 5 variantes (una por motivo).</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">4</span>
+        <span>Anotaciones breves de flujo entre pantallas (flechas o notas de navegación).</span>
+    </div>
+    <div class="rule-item">
+        <span class="rule-number">5</span>
+        <span>Verificación de que se cumplen los estados obligatorios y las reglas de negocio listadas arriba.</span>
+    </div>
+</div>
+
+<div class="success-criteria">
+    <h3>✅ Criterio de éxito</h3>
+    <p>Un desarrollador puede mirar los wireframes y decir sin dudas: <em>"Estas son las 5 pantallas del MVP de FastCode con todos sus estados, listas para implementar, sin nada fuera de alcance"</em>.</p>
+</div>
+
+        </main>
+    </div>
+</body>
+</html>
